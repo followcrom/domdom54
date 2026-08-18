@@ -1,6 +1,6 @@
 # 🦉 DomDom 54: Development 📱
 
-DON'T manage notifications here. Use `projects/domdom_notifications`
+🚨 DON'T manage notifications here. Use `projects/domdom_notifications`
 
 ## 🏗️ Cross-machine (Arm64 Surface + x86 Desktop)
 
@@ -82,11 +82,7 @@ Record the screen with:
 scrcpy --r filename.mp4
 ```
 
-<br>
-
-# <div align="center">
-
-</div>
+---
 
 # 👨‍🔧 Troubleshooting 🧙🏼‍♂️
 
@@ -128,9 +124,13 @@ page. Run `selfTest` in the Apps Script editor to check sheet + email wiring.
 
 <br>
 
-## 🔥 Firebase project (`domdom-52`)
+## 🔥 Google Firebase project (`domdom-52`) 🔵🔴🟡🟢
 
-Android push delivery runs through FCM (`app.config.js` → `googleServicesFile`). Deleting it
+I use Firebase for **Cloud Messaging only**. The Realtime Database was retired
+in Aug 2026. Push tokens now live in a Google Sheet written by a Google Apps
+Script web app.
+
+Android push delivery runs through FCM (`app.config.js` → `googleServicesFile`). The `google-services.json` file contains configuration details such as API keys, project IDs, and other settings needed to connect your app to Firebase services Deleting it
 kills notifications.
 
 <br>
