@@ -11,11 +11,25 @@
  * protection is that the Apps Script validates every request server-side.
  */
 
-import { Platform } from "react-native";
 import Constants from "expo-constants";
+import * as Device from "expo-device";
 
 const ENDPOINT = process.env.EXPO_PUBLIC_TOKEN_ENDPOINT ?? "";
 const TIMEOUT_MS = 10000;
+
+/**
+ * Region from the device locale, e.g. "en-US" -> "US".
+ * Parsed by hand rather than via `Intl.Locale` — that constructor isn't
+ * reliably implemented in Hermes and throws silently on some devices.
+ */
+function getCountry(): string {
+  try {
+    const locale = Intl.DateTimeFormat().resolvedOptions().locale;
+    return /-([A-Z]{2})(?:-|$)/.exec(locale)?.[1] ?? "";
+  } catch {
+    return "";
+  }
+}
 
 export type TokenAction = "save" | "remove";
 
@@ -45,8 +59,9 @@ async function post(action: TokenAction, token: string): Promise<TokenResult> {
       body: JSON.stringify({
         action,
         token,
-        platform: Platform.OS,
         appVersion: Constants.expoConfig?.version ?? "",
+        osVersion: Device.osVersion ?? "",
+        country: getCountry(),
       }),
       signal: controller.signal,
     });

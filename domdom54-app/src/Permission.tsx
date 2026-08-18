@@ -104,7 +104,7 @@ async function registerForPushNotificationsAsync(
     }
 
     const expoPushToken = pushTokenData.data;
-    // console.log("Expo Push Token:", expoPushToken); // dev only — don't log the push token in release
+    console.log("Expo Push Token:", expoPushToken); // dev only — don't log the push token in release
 
     // Save token to Firebase
     await checkAndSaveToken(expoPushToken);

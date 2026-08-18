@@ -47,6 +47,6 @@ For your peace of mind, RanDOM WisDOM is 100% free, requires no sign-ups, and gu
 
 <br>
 
-[![Last commit](https://img.shields.io/github/last-commit/followcrom/domdom54?style=flat)](https://github.com/followcrom/domdom54/commits/main)
+[![Last commit](https://img.shields.io/github/last-commit/followcrom/domdom54?style=for-the-badge&logo=github)](https://github.com/followcrom/domdom54/commits/main)
 
-![Repo size](https://img.shields.io/github/repo-size/followcrom/domdom54?style=flat&label=Repo%20Size)
+[![Repo size](https://img.shields.io/github/repo-size/followcrom/domdom54?style=for-the-badge&label=Repo%20Size&logo=github)](https://github.com/followcrom/domdom54)
