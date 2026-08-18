@@ -1,6 +1,6 @@
 # 🦉 DomDom 54: Development 📱
 
-🚨 DON'T manage notifications here. Use `projects/domdom_notifications`
+🚨 **DON'T** manage notifications here. Use `projects/domdom_notifications`
 
 ## 🏗️ Cross-machine (Arm64 Surface + x86 Desktop)
 
@@ -8,7 +8,7 @@
 
 **SURFACE** is `projects/domdom52` on WSL2 and works with _scrcpy_, and a physical device. Connect phone via USB. There is no need to unblock connections through the firewall if connecting via USB.
 
----
+<br>
 
 ## ✂️ Dev vs Prod Split
 
@@ -22,7 +22,7 @@ The `production` profile sets nothing, so it uses the real package.
 `app.config.js` starts with `import "dotenv/config"`, so `domdom54-app/.env` is
 loaded before the config is evaluated. The file is gitignored, so it never reaches the build server. This also means the info in `.env` is never used in _eas builds_, which use the EAS-stored env vars.
 
----
+<br>
 
 ## 🏭 Local Development
 
@@ -62,7 +62,7 @@ npx expo start
 
 To open on the emulator, press 'a' in the terminal. This should open the .dev build as the local .env sets `process.env.APP_VARIANT === "development"`.
 
----
+<br>
 
 ## 👍 Screen Copy (`scrcpy`)
 
@@ -82,7 +82,7 @@ Record the screen with:
 scrcpy --r filename.mp4
 ```
 
----
+<br>
 
 # 👨‍🔧 Troubleshooting 🧙🏼‍♂️
 
@@ -103,7 +103,7 @@ package is gone from the client entirely.
 
 Env Variable `EXPO_PUBLIC_TOKEN_ENDPOINT` is set in `.env` and in EAS build profiles. It points to the Apps Script `/exec` URL.
 
-If the `EXPO_PUBLIC_TOKEN_ENDPOINT` variable is missing at build time the app does **not** crash —
+If the `EXPO_PUBLIC_TOKEN_ENDPOINT` variable is missing at build time the app does **not** crash -
 `pushTokenStore` logs a warning and skips the write. Convenient, but it means a
 misconfigured build fails silently. Check `eas env:list`.
 
@@ -117,7 +117,7 @@ Saving the script does **not** change what `/exec` serves. Every time:
 
 > Deploy → Manage deployments → ✏️ → Version: **New version** → Deploy
 
-Access must be **"Anyone"**, not "Anyone with a Google account" — the app posts
+Access must be **"Anyone"**, not "Anyone with a Google account" - the app posts
 unauthenticated. Verify by opening the `/exec` URL in an incognito window; you
 should get `{"ok":true,"service":"domdom-token-store"}` rather than a sign-in
 page. Run `selfTest` in the Apps Script editor to check sheet + email wiring.
@@ -130,7 +130,7 @@ I use Firebase for **Cloud Messaging only**. The Realtime Database was retired
 in Aug 2026. Push tokens now live in a Google Sheet written by a Google Apps
 Script web app.
 
-Android push delivery runs through FCM (`app.config.js` → `googleServicesFile`). The `google-services.json` file contains configuration details such as API keys, project IDs, and other settings needed to connect your app to Firebase services Deleting it
+Android push delivery runs through FCM (`app.config.js` → `googleServicesFile`). The `google-services.json` file contains configuration details such as API keys, project IDs, and other settings needed to connect your app to Firebase services. Deleting it
 kills notifications.
 
 <br>
@@ -177,7 +177,3 @@ taskkill /PID <PID> /F
 Replace <PID> with the actual PID you found in the previous step.
 
 <br>
-
-# <div align="center">
-
-</div>

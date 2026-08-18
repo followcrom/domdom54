@@ -37,7 +37,7 @@ Confirm the output shows `com.followcrom.domdom`, `RanDOM WisDOM`, and scheme
 
 Bump `version` (and usually `runtimeVersion`) for a user-facing release.
 
----
+<br>
 
 ## 🏗️ 2. Development build (Native changes need a new dev build)
 
@@ -59,7 +59,7 @@ eas build --profile preview --platform android
 | Debuggable                  | yes                           | no                  |
 | Speed                       | sluggish                      | production-like     |
 
----
+<br>
 
 ## 💼 3. Production build → Play Store
 
@@ -71,7 +71,7 @@ eas build --profile preview --platform android
 eas build --profile production --platform android
 ```
 
----
+<br>
 
 ## 📤 4. EAS Submit
 
@@ -86,7 +86,7 @@ Submit the AAB (`playstore_key.json` is saved in eas credentials):
 eas submit --profile production --platform android
 ```
 
----
+<br>
 
 ## 🏪 On the Google Play Store 🔵🔴🟡🟢
 
@@ -113,7 +113,7 @@ Production releases go through Google's review before going live;
 internal-track releases don't, which is why internal is the fast loop for verifying a build
 before it's public.
 
----
+<br>
 
 ## ☁️ On the Google Cloud Platform 🔵🔴🟡🟢
 
@@ -137,7 +137,7 @@ Download your keystore from Expo’s servers:
 eas credentials -p android --platform android
 ```
 
----
+<br>
 
 ## ♻️ Environment Variables
 
@@ -163,7 +163,7 @@ The three crentials files are:
 
 These are stored in the Expo servers and are not checked into source control. You can download them using `eas credentials -p android --platform android`.
 
----
+<br>
 
 ## 🍃 OTA Updates 🌟
 
@@ -177,19 +177,19 @@ eas update --branch production --environment production --message "OTA update - 
 ```
 
 🔴 **`--environment production` is not optional.** `eas update` bundles the JS
-**on your machine**, not on EAS servers — so on SDK 54 it reads your local
+**on your machine**, not on EAS servers - so on SDK 54 it reads your local
 `.env` unless told otherwise. Without the flag, an OTA published to the
 production branch is built with `APP_VARIANT=development`, and any
 `EXPO_PUBLIC_*` values come from `.env` rather than the EAS `production`
 environment.
 
 With the flag, EAS environment variables are used and local `.env` files are
-ignored entirely — which is also what keeps `EXPO_PUBLIC_TOKEN_ENDPOINT`
+ignored entirely - which is also what keeps `EXPO_PUBLIC_TOKEN_ENDPOINT`
 consistent between builds and updates. The flag becomes **required** in SDK 55,
 so adopting it now costs nothing.
 
 Native config (package name, app name, icon) can't change over OTA, so a
-mistake here won't rename the installed app — it quietly ships a bundle built
+mistake here won't rename the installed app - it quietly ships a bundle built
 against the wrong config instead, which is harder to spot.
 
 ⚠️ If you bump `runtimeVersion`, existing installs on the old runtime will **not**
@@ -197,7 +197,7 @@ receive the OTA. They only move forward via a new AAB from the store. For an OTA
 bump `version` but leave `runtimeVersion` unchanged, so the update reaches every install still
 on that runtime.
 
----
+<br>
 
 ## 🖼️ Screenshots 📸
 
