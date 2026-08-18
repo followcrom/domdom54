@@ -49,7 +49,7 @@ emulator -avd Pixel_9
 ### 🌍 Start Expo Dev server
 
 ```bash
-cd dod54
+cd dd54
 
 code .
 

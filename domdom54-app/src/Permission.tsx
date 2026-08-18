@@ -104,9 +104,8 @@ async function registerForPushNotificationsAsync(
     }
 
     const expoPushToken = pushTokenData.data;
-    console.log("Expo Push Token:", expoPushToken); // dev only — don't log the push token in release
+    // console.log("Expo Push Token:", expoPushToken); // dev only — don't log the push token in release
 
-    // Save token to Firebase
     await checkAndSaveToken(expoPushToken);
 
     // Update state
@@ -165,6 +164,22 @@ export default function Permission() {
   useEffect(() => {
     const checkPermission = async () => {
       try {
+        // Always ask the OS first. A cached "granted" goes stale the moment the
+        // user turns notifications off in Android settings, and the previous
+        // version returned early on any stored value — so the screen kept
+        // reporting "Enabled" forever while Expo returned DeviceNotRegistered.
+        const { status: osStatus } = await Notifications.getPermissionsAsync();
+
+        if (osStatus !== "granted") {
+          setPermissionStatus(osStatus as PermissionStatus);
+          await AsyncStorage.setItem("permissionStatus", osStatus);
+          return;
+        }
+
+        // An OS grant on its own does not mean the user wants notifications:
+        // handleRevoke deletes the token and stores "denied" without touching
+        // the OS permission. So when the OS says granted, the stored value
+        // still wins — it is the only record of an in-app revoke.
         const storedStatus = (await AsyncStorage.getItem(
           "permissionStatus"
         )) as PermissionStatus | null;
@@ -172,9 +187,8 @@ export default function Permission() {
         if (storedStatus) {
           setPermissionStatus(storedStatus);
         } else {
-          const { status } = await Notifications.getPermissionsAsync();
-          setPermissionStatus(status as PermissionStatus);
-          await AsyncStorage.setItem("permissionStatus", status);
+          setPermissionStatus(osStatus as PermissionStatus);
+          await AsyncStorage.setItem("permissionStatus", osStatus);
         }
       } catch (error) {
         console.error("Error checking permission:", error);

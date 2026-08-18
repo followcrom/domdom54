@@ -19,8 +19,11 @@ const TIMEOUT_MS = 10000;
 
 /**
  * Region from the device locale, e.g. "en-US" -> "US".
- * Parsed by hand rather than via `Intl.Locale` — that constructor isn't
- * reliably implemented in Hermes and throws silently on some devices.
+ *
+ * The region is pulled out of `Intl.DateTimeFormat().resolvedOptions().locale`
+ * with a regex rather than read from `new Intl.Locale(locale).region` — the
+ * `Intl.Locale` constructor isn't reliably implemented in Hermes. Locales that
+ * carry no region ("en") yield "", which the endpoint stores as unknown.
  */
 function getCountry(): string {
   try {

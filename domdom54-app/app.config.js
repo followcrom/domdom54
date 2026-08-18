@@ -73,7 +73,9 @@ export default {
       //    translucent. expo-status-bar warns and ignores both at runtime.
       //
       // The deprecated `Window.setStatusBarColor` calls Play flagged are NOT from here —
-      // see TODO.md §2.2; they are in react-native-screens' dex.
+      // they live in react-native-screens' own dex, not in this block and not in
+      // expo-status-bar. Nothing in this config can silence them; they clear when
+      // react-native-screens ships a version that stops calling the deprecated API.
       barStyle: "dark-content",
     },
     extra: {
