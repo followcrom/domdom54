@@ -170,7 +170,8 @@ These are stored in the Expo servers and are not checked into source control. Yo
 Update the production app via EAS Update. This lets you push JS/asset changes to users without rebuilding the native binary - ideal for bug fixes, UI tweaks, or logic changes
 
 - Commit all changes
-- Publish the update:
+
+## Production update
 
 ```bash
 eas update --branch production --environment production --message "OTA update - Version: 2.1.1, Runtime: 2.1.0" --platform android
@@ -188,9 +189,15 @@ ignored entirely - which is also what keeps `EXPO_PUBLIC_TOKEN_ENDPOINT`
 consistent between builds and updates. The flag becomes **required** in SDK 55,
 so adopting it now costs nothing.
 
-Native config (package name, app name, icon) can't change over OTA, so a
-mistake here won't rename the installed app - it quietly ships a bundle built
-against the wrong config instead, which is harder to spot.
+## Preview update
+
+you can publish an EAS Update to the preview channel and the app already on your device will fetch it — no reinstall required:
+
+```bash
+eas update --branch preview --message "Rework Permission screen: separate OS permission from message subscription"
+```
+
+## Versioning
 
 ⚠️ If you bump `runtimeVersion`, existing installs on the old runtime will **not**
 receive the OTA. They only move forward via a new AAB from the store. For an OTA-only release,

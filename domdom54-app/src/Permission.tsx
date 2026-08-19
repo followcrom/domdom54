@@ -6,6 +6,7 @@ import {
   ScrollView,
   Alert,
   Linking,
+  AppState,
   useWindowDimensions,
 } from "react-native";
 import { Ionicons, MaterialCommunityIcons } from "@expo/vector-icons";
@@ -18,7 +19,13 @@ import styles from "./styles/Styles";
 import { useNavigation } from "@react-navigation/native";
 import { StackNavigationProp } from "@react-navigation/stack";
 
-type PermissionStatus = "granted" | "denied" | "undetermined" | "checking";
+// The OS-level permission (can only be granted/revoked by the user, via the
+// native prompt once or via system settings after that) and the app's own
+// "should the backend send this device messages" state (a token's presence
+// in the push token sheet) are two independent gates. Both must be open for
+// a message to actually reach the user, so they're tracked separately below
+// instead of being folded into one flag.
+type OsPermissionStatus = "granted" | "denied" | "undetermined" | "checking";
 
 type RootStackParamList = {
   Permission: undefined;
@@ -31,6 +38,8 @@ type PermissionNavigationProp = StackNavigationProp<
   RootStackParamList,
   "Permission"
 >;
+
+const SUBSCRIBED_KEY = "pushSubscribed";
 
 // --- Helper Functions ---
 
@@ -45,109 +54,26 @@ function getProjectId(): string | undefined {
   );
 }
 
-async function checkAndSaveToken(expoPushToken: string) {
-  // De-duplication now happens server-side, so this is a single round trip.
-  const result = await saveToken(expoPushToken);
-  if (result.ok) {
-    console.log(`Token ${result.status}`);
-  } else {
-    console.error("Error saving token:", result.error);
+/** Fetches this device's Expo push token. Requires a physical device and a valid project ID. */
+async function getExpoPushToken(): Promise<string> {
+  const projectId = getProjectId();
+  if (!projectId) {
+    throw new Error("Project ID not found in app configuration");
   }
-}
-
-async function registerForPushNotificationsAsync(
-  setExpoPushToken: (token: string) => void,
-  setPermissionStatus: (status: PermissionStatus) => void
-) {
-  try {
-    // The "default" channel is created at app startup (see App.tsx).
-
-    // Check if running on physical device
-    if (!Device.isDevice) {
-      handleRegistrationError("Must use a physical device for Push Notifications");
-      return;
-    }
-
-    // Check existing permissions
-    const { status: existingStatus } = await Notifications.getPermissionsAsync();
-    let finalStatus = existingStatus;
-
-    // Request permissions if not granted
-    if (existingStatus !== "granted") {
-      const { status } = await Notifications.requestPermissionsAsync();
-      finalStatus = status;
-    }
-
-    if (finalStatus !== "granted") {
-      handleRegistrationError("Permission not granted for push notifications!");
-      setPermissionStatus("denied");
-      await AsyncStorage.setItem("permissionStatus", "denied");
-      return;
-    }
-
-    // Get project ID from app config
-    const projectId = getProjectId();
-
-    if (!projectId) {
-      handleRegistrationError("Project ID not found in app configuration");
-      return;
-    }
-
-    // Get Expo push token
-    const pushTokenData = await Notifications.getExpoPushTokenAsync({ 
-      projectId 
-    });
-    
-    if (!pushTokenData?.data) {
-      handleRegistrationError("Failed to get push token");
-      return;
-    }
-
-    const expoPushToken = pushTokenData.data;
-    // console.log("Expo Push Token:", expoPushToken); // dev only — don't log the push token in release
-
-    await checkAndSaveToken(expoPushToken);
-
-    // Update state
-    setExpoPushToken(expoPushToken);
-    setPermissionStatus("granted");
-    await AsyncStorage.setItem("permissionStatus", "granted");
-
-  } catch (error) {
-    const errorMessage = error instanceof Error ? error.message : "Unknown error occurred";
-    handleRegistrationError(`Error getting push token: ${errorMessage}`);
-    console.error("Full error:", error);
+  const pushTokenData = await Notifications.getExpoPushTokenAsync({ projectId });
+  if (!pushTokenData?.data) {
+    throw new Error("Failed to get push token");
   }
+  return pushTokenData.data;
 }
 
 /** Re-derives the device's Expo push token when component state doesn't have it. */
 async function resolveExpoPushToken(): Promise<string> {
-  const projectId = getProjectId();
-  if (!projectId) return "";
   try {
-    const data = await Notifications.getExpoPushTokenAsync({ projectId });
-    return data?.data ?? "";
+    return await getExpoPushToken();
   } catch (error) {
     console.error("Could not resolve push token:", error);
     return "";
-  }
-}
-
-async function removeToken(expoPushToken: string) {
-  // `expoPushToken` is only populated when the user enabled notifications
-  // during this session. After a cold start the state is empty, so resolve the
-  // token first — otherwise revoking silently leaves it in the store.
-  const token = expoPushToken || (await resolveExpoPushToken());
-  if (!token) {
-    console.warn("No push token available to remove");
-    return;
-  }
-
-  const result = await deleteToken(token);
-  if (result.ok) {
-    console.log(`Token ${result.status}`);
-  } else {
-    console.error("Error removing token:", result.error);
   }
 }
 
@@ -156,64 +82,98 @@ async function removeToken(expoPushToken: string) {
 export default function Permission() {
   const navigation = useNavigation<PermissionNavigationProp>();
   const [expoPushToken, setExpoPushToken] = useState("");
-  const [permissionStatus, setPermissionStatus] =
-    useState<PermissionStatus>("checking");
+  const [osPermission, setOsPermission] = useState<OsPermissionStatus>("checking");
+  const [subscribed, setSubscribed] = useState(false);
   const { width, height } = useWindowDimensions();
   const isLandscape = width > height;
 
-  useEffect(() => {
-    const checkPermission = async () => {
-      try {
-        // Always ask the OS first. A cached "granted" goes stale the moment the
-        // user turns notifications off in Android settings, and the previous
-        // version returned early on any stored value — so the screen kept
-        // reporting "Enabled" forever while Expo returned DeviceNotRegistered.
-        const { status: osStatus } = await Notifications.getPermissionsAsync();
-
-        if (osStatus !== "granted") {
-          setPermissionStatus(osStatus as PermissionStatus);
-          await AsyncStorage.setItem("permissionStatus", osStatus);
-          return;
-        }
-
-        // An OS grant on its own does not mean the user wants notifications:
-        // handleRevoke deletes the token and stores "denied" without touching
-        // the OS permission. So when the OS says granted, the stored value
-        // still wins — it is the only record of an in-app revoke.
-        const storedStatus = (await AsyncStorage.getItem(
-          "permissionStatus"
-        )) as PermissionStatus | null;
-
-        if (storedStatus) {
-          setPermissionStatus(storedStatus);
-        } else {
-          setPermissionStatus(osStatus as PermissionStatus);
-          await AsyncStorage.setItem("permissionStatus", osStatus);
-        }
-      } catch (error) {
-        console.error("Error checking permission:", error);
-        setPermissionStatus("undetermined");
-      }
-    };
-
-    checkPermission();
-  }, []);
-
-  const handleAccept = () => {
-    registerForPushNotificationsAsync(setExpoPushToken, setPermissionStatus);
-  };
-
-  const handleRevoke = async () => {
+  const refreshOsPermission = async () => {
     try {
-      await removeToken(expoPushToken);
-      setExpoPushToken("");
-      setPermissionStatus("denied");
-      await AsyncStorage.setItem("permissionStatus", "denied");
+      const { status } = await Notifications.getPermissionsAsync();
+      setOsPermission(status as OsPermissionStatus);
     } catch (error) {
-      console.error("Error revoking permissions:", error);
-      Alert.alert("Error", "Failed to disable notifications");
+      console.error("Error checking permission:", error);
     }
   };
+
+  useEffect(() => {
+    refreshOsPermission();
+
+    AsyncStorage.getItem(SUBSCRIBED_KEY).then((stored) => {
+      setSubscribed(stored === "true");
+    });
+
+    // Android lets the user flip this app's notification permission from system
+    // settings at any time, outside the app entirely — it's the deciding factor
+    // for whether messages actually appear, regardless of any in-app state. Re-check
+    // whenever the app returns to the foreground so this screen doesn't show a
+    // stale status after a Settings round trip.
+    const subscription = AppState.addEventListener("change", (nextState) => {
+      if (nextState === "active") {
+        refreshOsPermission();
+      }
+    });
+
+    return () => subscription.remove();
+  }, []);
+
+  const handleRequestOsPermission = async () => {
+    if (!Device.isDevice) {
+      handleRegistrationError("Must use a physical device for Push Notifications");
+      return;
+    }
+    try {
+      const { status } = await Notifications.requestPermissionsAsync();
+      setOsPermission(status as OsPermissionStatus);
+      if (status !== "granted") {
+        handleRegistrationError("Permission not granted for push notifications!");
+      }
+    } catch (error) {
+      const message = error instanceof Error ? error.message : "Unknown error occurred";
+      handleRegistrationError(`Error requesting permission: ${message}`);
+    }
+  };
+
+  const handleToggleSubscribe = async () => {
+    try {
+      if (subscribed) {
+        const token = expoPushToken || (await resolveExpoPushToken());
+        if (token) {
+          const result = await deleteToken(token);
+          if (!result.ok) console.error("Error removing token:", result.error);
+        }
+        setExpoPushToken("");
+        setSubscribed(false);
+        await AsyncStorage.setItem(SUBSCRIBED_KEY, "false");
+      } else {
+        if (!Device.isDevice) {
+          handleRegistrationError("Must use a physical device for Push Notifications");
+          return;
+        }
+        const token = await getExpoPushToken();
+        const result = await saveToken(token);
+        if (!result.ok) {
+          handleRegistrationError(`Error saving token: ${result.error}`);
+          return;
+        }
+        setExpoPushToken(token);
+        setSubscribed(true);
+        await AsyncStorage.setItem(SUBSCRIBED_KEY, "true");
+      }
+    } catch (error) {
+      const message = error instanceof Error ? error.message : "Unknown error occurred";
+      handleRegistrationError(message);
+    }
+  };
+
+  const statusLabel =
+    osPermission === "granted"
+      ? "Allowed"
+      : osPermission === "denied"
+      ? "Blocked"
+      : osPermission === "undetermined"
+      ? "Not yet requested"
+      : "Checking...";
 
   return (
     <ScrollView contentContainerStyle={styles.container}>
@@ -233,25 +193,67 @@ export default function Permission() {
                   isLandscape && styles.textOutputLandscape,
                 ]}
               >
-          Current status:{" "}
-          {permissionStatus === "granted" ? "Enabled" : "Disabled"}
+          System permission: {statusLabel}
         </Text>
+        {osPermission === "granted" && (
+              <Text
+                style={[
+                  styles.textOutput,
+                  isLandscape && styles.textOutputLandscape,
+                ]}
+              >
+            Receiving messages: {subscribed ? "Yes" : "No"}
+          </Text>
+        )}
+        {osPermission === "denied" && subscribed && (
+              <Text
+                style={[
+                  styles.textOutput,
+                  isLandscape && styles.textOutputLandscape,
+                ]}
+              >
+            You're subscribed, but system permission is off — messages won't
+            appear until you re-enable it.
+          </Text>
+        )}
       </View>
 
       <View style={styles.buttonContainer}>
-        {permissionStatus === "granted" ? (
-          <TouchableOpacity style={styles.buttonIcon} onPress={handleRevoke}>
+        {osPermission === "undetermined" && (
+          <TouchableOpacity
+            style={styles.buttonIcon}
+            onPress={handleRequestOsPermission}
+          >
+            <Ionicons name="notifications-outline" size={48} color="white" />
+            <Text style={styles.buttonText}>Enable Notifications</Text>
+          </TouchableOpacity>
+        )}
+
+        {osPermission === "denied" && (
+          <TouchableOpacity
+            style={styles.buttonIcon}
+            onPress={() => Linking.openSettings()}
+          >
+            <Ionicons name="settings-outline" size={48} color="white" />
+            <Text style={styles.buttonText}>Open Notification Settings</Text>
+          </TouchableOpacity>
+        )}
+
+        {osPermission === "granted" && (
+          <TouchableOpacity
+            style={styles.buttonIcon}
+            onPress={handleToggleSubscribe}
+          >
             <Ionicons
-              name="notifications-off-outline"
+              name={
+                subscribed ? "notifications-off-outline" : "notifications-outline"
+              }
               size={48}
               color="white"
             />
-            <Text style={styles.buttonText}>Disable Notifications</Text>
-          </TouchableOpacity>
-        ) : (
-          <TouchableOpacity style={styles.buttonIcon} onPress={handleAccept}>
-            <Ionicons name="notifications-outline" size={48} color="white" />
-            <Text style={styles.buttonText}>Enable Notifications</Text>
+            <Text style={styles.buttonText}>
+              {subscribed ? "Stop Receiving Messages" : "Start Receiving Messages"}
+            </Text>
           </TouchableOpacity>
         )}
       </View>
