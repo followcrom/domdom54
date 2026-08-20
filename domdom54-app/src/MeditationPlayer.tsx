@@ -5,13 +5,12 @@ import {
   Text,
   StyleSheet,
   ActivityIndicator,
-  Image,
   ImageBackground,
-  useWindowDimensions,
 } from "react-native";
 import { useAudioPlayer, useAudioPlayerStatus, setAudioModeAsync } from "expo-audio";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import styles from "./styles/Styles";
+import { Banner, useIsLandscape } from "./components/Layout";
 import { Ionicons, MaterialCommunityIcons } from "@expo/vector-icons";
 import { RouteProp, useRoute, useNavigation } from "@react-navigation/native";
 import { StackNavigationProp } from "@react-navigation/stack";
@@ -58,8 +57,7 @@ export default function MeditationPlayer() {
   const navigation = useNavigation<MeditationPlayerNavigationProp>();
   const { audioUrl, title } = route.params;
 
-  const { width, height } = useWindowDimensions();
-  const isLandscape = width > height;
+  const isLandscape = useIsLandscape();
 
   // Create a single player instance and load the audio URL
   const player = useAudioPlayer();
@@ -193,10 +191,7 @@ export default function MeditationPlayer() {
             onPress={() => navigation.goBack()}
           />
         </View>
-      <Image
-        source={require("../assets/images/random_wisdom_landscape.jpg")}
-        style={isLandscape ? styles.imageLandscape : styles.image}
-      />
+        <Banner />
 
         {isLoading && <ActivityIndicator size="large" color="#fff" />}
 

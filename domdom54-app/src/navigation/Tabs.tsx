@@ -8,15 +8,33 @@ import { BottomTabBarProps } from '@react-navigation/bottom-tabs';
 // Screen Components
 import Home from '../Home';
 import TextPage from '../Text';
-import Search from '../Search';
 import Moments from '../Moments';
 import Meditations from '../Meditations';
-import Permission from '../Permission';
+import Settings from '../Settings';
 import Discuss from '../Discuss';
+import Message from '../Message';
+import type { MessageData } from '../Message';
 
-const Tab = createBottomTabNavigator();
+/**
+ * Every route in the tab navigator, including the ones the custom tab bar hides.
+ * Exported so App.tsx can type the nested navigate() a push notification makes:
+ * navigate('HomeTabs', { screen: 'Messages', params: data }).
+ */
+export type TabParamList = {
+  Wisdom: undefined;
+  Moments: undefined;
+  Meditations: undefined;
+  Messages: Partial<MessageData> | undefined;
+  Settings: undefined;
+  Home: undefined;
+  Discuss: { discussPhrase: string };
+};
 
-type TabName = 'Wisdom' | 'Search' | 'Meditations' | 'Moments' | 'Permission';
+const Tab = createBottomTabNavigator<TabParamList>();
+
+// Search used to be a tab of its own. It now lives inside Wisdom, which is a
+// single phrase display fed by either the random endpoint or a search.
+type TabName = 'Wisdom' | 'Meditations' | 'Moments' | 'Messages' | 'Settings';
 
 // Define a more specific type for Material Community Icons
 type MaterialCommunityIconName = React.ComponentProps<typeof MaterialCommunityIcons>['name'];
@@ -24,14 +42,14 @@ type MaterialCommunityIconName = React.ComponentProps<typeof MaterialCommunityIc
 // Icon mapping for visible tabs only - with proper typing
 const screenIcons: Record<TabName, { focused: MaterialCommunityIconName; unfocused: MaterialCommunityIconName }> = {
   Wisdom: { focused: 'lightbulb-on', unfocused: 'lightbulb-on-outline' },
-  Search: { focused: 'layers-search', unfocused: 'layers-search-outline' },
   Meditations: { focused: 'head-heart', unfocused: 'head-heart-outline' },
   Moments: { focused: 'kettle-steam', unfocused: 'kettle-steam-outline' },
-  Permission: { focused: 'cog', unfocused: 'cog-outline' },
+  Messages: { focused: 'message-text', unfocused: 'message-text-outline' },
+  Settings: { focused: 'cog', unfocused: 'cog-outline' },
 };
 
 // Tab names that should be visible in the tab bar
-const visibleTabs: TabName[] = ['Wisdom', 'Search', 'Moments', 'Meditations', 'Permission'];
+const visibleTabs: TabName[] = ['Wisdom', 'Moments', 'Meditations', 'Messages', 'Settings'];
 
 // Custom Tab Bar Component
 function CustomTabBar({ state, descriptors, navigation }: BottomTabBarProps) {
@@ -166,27 +184,6 @@ export default function BottomTabs() {
       />
       
       <Tab.Screen
-        name="Search"
-        component={Search}
-        options={{
-          headerTitleAlign: "center",
-          headerStyle,
-          headerTitle: () => (
-            <View style={styles.headerTitleContainer}>
-              <MaterialCommunityIcons
-                name="cloud-search-outline"
-                size={36}
-                color="#12abef"
-              />
-              <Text style={[styles.headerTitleText, { marginLeft: 15 }]}>
-                Search
-              </Text>
-            </View>
-          ),
-        }}
-      />
-      
-      <Tab.Screen
         name="Moments"
         component={Moments}
         options={{
@@ -229,11 +226,31 @@ export default function BottomTabs() {
       />
       
       <Tab.Screen
-        name="Permission"
-        component={Permission}
+        name="Messages"
+        component={Message}
         options={{
           headerTitleAlign: "center",
-          tabBarLabel: "Settings",
+          headerStyle,
+          headerTitle: () => (
+            <View style={styles.headerTitleContainer}>
+              <MaterialCommunityIcons
+                name="cellphone-message"
+                size={34}
+                color="#12abef"
+              />
+              <Text style={[styles.headerTitleText, { marginLeft: 12 }]}>
+                Messages
+              </Text>
+            </View>
+          ),
+        }}
+      />
+
+      <Tab.Screen
+        name="Settings"
+        component={Settings}
+        options={{
+          headerTitleAlign: "center",
           headerStyle,
           headerTitle: () => (
             <View style={styles.headerTitleContainer}>

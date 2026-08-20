@@ -1,14 +1,18 @@
 import "react-native-gesture-handler";
 import React, { useEffect, useRef } from "react";
-import { NavigationContainer, NavigationContainerRef } from "@react-navigation/native";
+import {
+  NavigationContainer,
+  NavigationContainerRef,
+  NavigatorScreenParams,
+} from "@react-navigation/native";
 import * as Notifications from 'expo-notifications';
 import { createStackNavigator } from "@react-navigation/stack";
 import * as Linking from "expo-linking";
 import { ActivityIndicator, View } from "react-native";
 import { StatusBar } from "expo-status-bar";
 import BottomTabs from "./src/navigation/Tabs";
+import type { TabParamList } from "./src/navigation/Tabs";
 import MeditationPlayer from "./src/MeditationPlayer";
-import Message from "./src/Message";
 import Contact from "./src/Contact";
 import type { EventSubscription } from 'expo-notifications';
 
@@ -26,9 +30,10 @@ type NotificationData = {
 
 // Define all the screens and their parameters in our root stack
 export type RootStackParamList = {
-  HomeTabs: undefined;
+  // Messages is a tab now, so the stack's job is to hand params down into the
+  // tab navigator rather than to own a Message screen of its own.
+  HomeTabs: NavigatorScreenParams<TabParamList>;
   MeditationPlayer: { audioUrl: string; title: string };
-  Message: Partial<NotificationData>; // All params are optional
   Contact: undefined;
 };
 
@@ -51,6 +56,11 @@ const linking = {
     screens: {
       HomeTabs: {
         path: "/home",
+        // Nested, because Messages lives inside the tab navigator. The old
+        // top-level "Message" entry would no longer resolve to anything.
+        screens: {
+          Messages: "message",
+        },
       },
       MeditationPlayer: {
         path: "/meditation/:audioUrl/:title",
@@ -62,9 +72,6 @@ const linking = {
           audioUrl: (audioUrl: string) => encodeURIComponent(audioUrl),
           title: (title: string) => encodeURIComponent(title),
         },
-      },
-      Message: {
-        path: "/message",
       },
     },
   },
@@ -144,7 +151,13 @@ export default function App() {
       // Ensure we have the navigation ready and data is valid
       setTimeout(() => {
         try {
-          navigationRef.current?.navigate("Message", data);
+          // Messages is nested inside HomeTabs, so the params have to be
+          // addressed through the tab navigator rather than passed to a
+          // top-level route.
+          navigationRef.current?.navigate("HomeTabs", {
+            screen: "Messages",
+            params: data,
+          });
         } catch (error) {
           console.error("Navigation error:", error);
         }
@@ -201,15 +214,6 @@ export default function App() {
           <Stack.Screen
             name="MeditationPlayer"
             component={MeditationPlayer}
-            options={{
-              headerShown: false,
-              presentation: 'modal',
-              gestureEnabled: true,
-            }}
-          />
-          <Stack.Screen
-            name="Message"
-            component={Message}
             options={{
               headerShown: false,
               presentation: 'modal',

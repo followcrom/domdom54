@@ -4,13 +4,12 @@ import {
   View,
   Image,
   ImageBackground,
-  useWindowDimensions,
 } from 'react-native';
 import styles from './styles/Styles';
+import { useIsLandscape } from './components/Layout';
 
 export default function Home() {
-  const { width, height } = useWindowDimensions();
-  const isLandscape = width > height;
+  const isLandscape = useIsLandscape();
 
   // Landscape: show the wide artwork as a full-width banner at the top, reusing
   // the Wisdom (Text) screen's `imageLandscape` style so the two read
