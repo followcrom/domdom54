@@ -98,8 +98,19 @@ package is gone from the client entirely.
 2. `src/pushTokenStore.ts` POSTs `{action, token, appVersion, OSVersion, country}` as
    `text/plain` to `EXPO_PUBLIC_TOKEN_ENDPOINT`
 3. `docs/domdom-token-writer.gs` (actually runs on Google Sheets) validates the token shape, de-duplicates against the
-   sheet, appends a row, and emails admin.
-4. Revoking sends `{action: "remove"}`, which deletes the row
+   `tokens_active` sheet, appends a row, and emails admin.
+4. Revoking sends `{action: "remove"}`, which deletes the row from `tokens_active`.
+
+**Two sheets:**
+- `tokens_active` — capped at 20 rows, deduplicated. The send job pulls from this one.
+- `tokens_all` — uncapped, append-only. One row per save/remove attempt (including
+  rejections like `busy`/`capacity`/`server-error`), with a status column — a
+  permanent audit trail of who enabled/disabled notifications and when, independent
+  of `tokens_active`'s current state.
+
+**Failure alerts:** unhandled errors, lock timeouts, and hitting the 20-row cap
+now email `ALERT_EMAIL` (throttled to 1 per 30 min via Script Properties) instead
+of only landing in the Apps Script Executions log, which nobody was checking.
 
 Env Variable `EXPO_PUBLIC_TOKEN_ENDPOINT` is set in `.env` and in EAS build profiles. It points to the Apps Script `/exec` URL.
 

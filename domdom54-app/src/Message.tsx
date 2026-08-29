@@ -9,22 +9,31 @@ import {
   TouchableOpacity,
   ToastAndroid,
   ActivityIndicator,
-  useWindowDimensions,
   Modal,
   Pressable,
 } from "react-native";
-import { useRoute, useNavigation, RouteProp } from "@react-navigation/native";
+import { useRoute, RouteProp } from "@react-navigation/native";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import { useAudioPlayback } from "./hooks/useAudioPlayback";
 import styles from "./styles/Styles";
+import { Body, Card } from "./components/Layout";
 import { Ionicons } from "@expo/vector-icons";
-import { StackNavigationProp } from "@react-navigation/stack";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
+
+// This was a modal stack screen reached from a button buried in Settings. It's
+// now a tab: a message is content, and content belongs in the tab bar. Two
+// things followed from the move - the close button went (a tab has nowhere to
+// go back to, and the tab bar is the way out), and the manual safe-area padding
+// went with it, because the tab navigator draws a real header now.
+//
+// It holds the LATEST message only, which is what "lastMessage" in AsyncStorage
+// has always stored. If this ever needs to be a list, that key becomes an array
+// and this screen grows a FlatList; nothing else has to change.
 
 // --- Type Definitions ---
 
-// The shape of the message data object
-type MessageData = {
+/** The shape of the message data object. Also the push notification payload. */
+export type MessageData = {
   id?: number; // <-- Make id optional
   title: string;
   body: string;
@@ -33,14 +42,11 @@ type MessageData = {
   audio: string | null;
 };
 
-// Define the navigation and route props for this screen
-type RootStackParamList = {
-  Message: Partial<MessageData>; // Params are optional
-  // Add other screens here
+type MessageRouteParams = {
+  Messages: Partial<MessageData> | undefined; // Params are optional
 };
 
-type MessageRouteProp = RouteProp<RootStackParamList, "Message">;
-type MessageNavigationProp = StackNavigationProp<RootStackParamList>;
+type MessageRouteProp = RouteProp<MessageRouteParams, "Messages">;
 
 const defaultMessage: MessageData = {
     title: "Your Messages",
@@ -54,14 +60,13 @@ const defaultMessage: MessageData = {
 // --- Component ---
 
 export default function Message() {
+  // Still needed, but only to position the close button inside the full-screen
+  // image modal - the modal draws behind the status bar. The screen itself no
+  // longer pads manually; the tab header handles that.
   const insets = useSafeAreaInsets();
   const route = useRoute<MessageRouteProp>();
-  const navigation = useNavigation<MessageNavigationProp>();
 
   const [messageData, setMessageData] = useState<MessageData>(defaultMessage);
-
-  const { width, height } = useWindowDimensions();
-  const isLandscape = width > height;
 
   // Audio player: handles play/pause, a loading spinner, and load failures.
   const { isPlaying, isLoadingPlayback, audioError, togglePlayPause } =
@@ -118,18 +123,7 @@ export default function Message() {
   // --- Render ---
 
   return (
-<ScrollView contentContainerStyle={[
-  styles.container,
-  { paddingTop: insets.top, paddingBottom: insets.bottom }
-]}>
-      <View style={messageStyles.closeContainer}>
-        <Ionicons
-          name="close-circle-outline"
-          size={40}
-          color="darkgrey"
-          onPress={() => navigation.goBack()}
-        />
-      </View>
+    <ScrollView contentContainerStyle={styles.container}>
       <Pressable
         onPress={() => setIsImageFullScreen(true)}
         accessibilityRole="imagebutton"
@@ -141,16 +135,9 @@ export default function Message() {
       >
         <Image source={imageSource} style={messageStyles.topImage} />
       </Pressable>
-        <View style={[styles.textContainer, isLandscape && styles.textContainerLandscape]}>
+      <Card>
         {title && <Text style={styles.title}>{title}</Text>}
-              <Text
-                style={[
-                  styles.textOutput,
-                  isLandscape && styles.textOutputLandscape,
-                ]}
-                onPress={showId}>
-          {body}
-        </Text>
+        <Body onPress={showId}>{body}</Body>
 
         {audio && audio !== null && (
           <View style={messageStyles.audioContainer}>
@@ -195,7 +182,7 @@ export default function Message() {
             </View>
           </TouchableOpacity>
         )}
-      </View>
+      </Card>
 
       <Modal
         visible={isImageFullScreen}
@@ -233,10 +220,6 @@ export default function Message() {
 }
 
 const messageStyles = StyleSheet.create({
-  closeContainer: {
-    padding: 10,
-    marginTop: 10, // A little extra than safe area insets
-  },
   imagePressable: {
     width: "100%",
   },

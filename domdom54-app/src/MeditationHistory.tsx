@@ -7,11 +7,11 @@ import {
   TouchableOpacity,
   StyleSheet,
   Share,
-  useWindowDimensions,
 } from "react-native";
 import { Ionicons } from "@expo/vector-icons";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import styles from "./styles/Styles";
+import { Body } from "./components/Layout";
 
 type MeditationLogEntry = {
   timestamp: string;
@@ -27,8 +27,6 @@ const ROW_COLORS = ["#e8f4fd", "#fff9e6"];
 
 export default function MeditationHistory({ visible, onClose }: Props) {
   const [meditationLog, setMeditationLog] = useState<MeditationLogEntry[]>([]);
-  const { width, height } = useWindowDimensions();
-  const isLandscape = width > height;
 
   const loadLog = async () => {
     try {
@@ -108,9 +106,7 @@ export default function MeditationHistory({ visible, onClose }: Props) {
           </View>
           <ScrollView contentContainerStyle={localStyles.scrollContent}>
             {meditationLog.length === 0 ? (
-              <Text style={[styles.textOutput, isLandscape && styles.textOutputLandscape]}>
-                No history yet.
-              </Text>
+              <Body>No history yet.</Body>
             ) : (
               meditationLog.map((entry, index) => {
                 const date = new Date(entry.timestamp);

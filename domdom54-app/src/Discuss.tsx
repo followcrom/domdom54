@@ -7,12 +7,11 @@ import {
   ActivityIndicator,
   TextInput,
   TouchableOpacity,
-  Image,
-  useWindowDimensions,
   Keyboard,
   KeyboardAvoidingView,
 } from "react-native";
 import styles from "./styles/Styles";
+import { Banner, Card } from "./components/Layout";
 import { Ionicons } from "@expo/vector-icons";
 import {
   useRoute,
@@ -73,9 +72,6 @@ export default function Discuss() {
   const textInputRef = useRef<TextInput>(null);
   const abortControllerRef = useRef<AbortController | null>(null);
 
-  const { width, height } = useWindowDimensions();
-  const isLandscape = width > height;
-  
   // State management
   const [outputText, setOutputText] = useState("");
   const [loading, setLoading] = useState(false);
@@ -290,12 +286,6 @@ export default function Discuss() {
     }
   }, [handleFollowUp, loading, userInput]);
 
-  // Memoized styles to prevent recreation
-  const dynamicTextStyle = useMemo(() => [
-    styles.textOutput,
-    isLandscape && styles.textOutputLandscape,
-  ], [isLandscape]);
-
   return (
     <KeyboardAvoidingView
       behavior="height"
@@ -309,12 +299,9 @@ export default function Discuss() {
         showsVerticalScrollIndicator={false}
         keyboardDismissMode="on-drag"
       >
-      <Image
-        source={require("../assets/images/random_wisdom_landscape.jpg")}
-        style={isLandscape ? styles.imageLandscape : styles.image}
-      />
+        <Banner />
 
-        <View style={[styles.textContainer, isLandscape && styles.textContainerLandscape]}>
+        <Card>
             <View style={{ paddingHorizontal: 10 }}>
             {loading && conversationHistory.length === 0 ? (
               <View style={discussPageStyles.loadingContainer}>
@@ -332,9 +319,9 @@ export default function Discuss() {
           {loading && conversationHistory.length > 0 && (
             <ActivityIndicator size="small" style={{ margin: 10 }} color="#0000ff" />
           )}
-        </View>
+        </Card>
 
-        <View style={[styles.textContainer, isLandscape && styles.textContainerLandscape]}>
+        <Card>
           <TextInput
             ref={textInputRef}
             style={discussPageStyles.input}
@@ -350,7 +337,7 @@ export default function Discuss() {
             editable={!loading}
             maxLength={500}
           />
-        </View>
+        </Card>
 
         <View style={styles.buttonContainer}>
           <TouchableOpacity 
