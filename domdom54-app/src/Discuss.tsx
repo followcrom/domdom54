@@ -6,13 +6,13 @@ import {
   View,
   ActivityIndicator,
   TextInput,
-  TouchableOpacity,
   Keyboard,
   KeyboardAvoidingView,
 } from "react-native";
 import styles from "./styles/Styles";
 import colors from "./styles/colors";
 import { Banner, Card } from "./components/Layout";
+import { PrimaryButton } from "./components/PrimaryButton";
 import { Ionicons } from "@expo/vector-icons";
 import {
   useRoute,
@@ -340,30 +340,16 @@ export default function Discuss() {
           />
         </Card>
 
-        <View style={[
-          styles.buttonContainer,
-          (loading || !userInput.trim()) && styles.buttonContainerDisabled,
-        ]}>
-          <TouchableOpacity 
-            style={styles.buttonIcon} 
-            onPress={handleFollowUp}
-            disabled={loading || !userInput.trim()}
-            accessibilityLabel="Ask followCrom"
-            accessibilityHint="Send your message to followCrom for wisdom"
-          >
-            <Ionicons 
-              name="chatbubbles-sharp" 
-              size={48} 
-              color={loading || !userInput.trim() ? colors.textDisabled : colors.textInverse} 
-            />
-            <Text style={[
-              styles.buttonText,
-              (loading || !userInput.trim()) && styles.buttonTextDisabled
-            ]}>
-              {loading ? "Asking..." : "Ask away!"}
-            </Text>
-          </TouchableOpacity>
-        </View>
+        <PrimaryButton
+          label={loading ? "Asking..." : "Ask away!"}
+          onPress={handleFollowUp}
+          disabled={loading || !userInput.trim()}
+          accessibilityLabel="Ask followCrom"
+          accessibilityHint="Send your message to followCrom for wisdom"
+          renderIcon={(color) => (
+            <Ionicons name="chatbubbles-sharp" size={48} color={color} />
+          )}
+        />
       </ScrollView>
     </KeyboardAvoidingView>
   );

@@ -15,6 +15,7 @@ import { StackNavigationProp } from "@react-navigation/stack";
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import styles from './styles/Styles';
 import colors from './styles/colors';
+import { PrimaryButton } from './components/PrimaryButton';
 
 // Define types for form data and errors
 interface FormData {
@@ -255,23 +256,11 @@ export default function Contact({ navigation }: ContactProps) {
           </View>
 
           {/* Submit Button */}
-          <TouchableOpacity
-            style={[
-              contactStyles.submitButton,
-              styles.shadowMd,
-              isLoading && styles.buttonContainerDisabled,
-              isLoading && contactStyles.submitButtonDisabledOutline,
-            ]}
+          <PrimaryButton
+            label={isLoading ? 'Sending...' : 'Send Message'}
             onPress={handleSubmit}
             disabled={isLoading}
-          >
-            <Text style={[
-              contactStyles.submitButtonText,
-              isLoading && styles.buttonTextDisabled,
-            ]}>
-              {isLoading ? 'Sending...' : 'Send Message'}
-            </Text>
-          </TouchableOpacity>
+          />
         </View>
       </ScrollView>
     </KeyboardAvoidingView>
@@ -333,24 +322,6 @@ const contactStyles = StyleSheet.create({
     color: colors.danger,
     fontSize: 14,
     marginTop: 5,
-  },
-  submitButton: {
-    backgroundColor: colors.brandStrong,
-    borderRadius: 8,
-    padding: 16,
-    alignItems: 'center',
-    marginTop: 0,
-  },
-  // The disabled fill and border colour come from `buttonContainerDisabled` in the
-  // central sheet - this used to be a hand-maintained copy of them. Only the width
-  // is local, because unlike the central button this one has no border at rest.
-  submitButtonDisabledOutline: {
-    borderWidth: 1,
-  },
-  submitButtonText: {
-    color: colors.textInverse,
-    fontSize: 18,
-    fontWeight: '600',
   },
   successBanner: {
     backgroundColor: colors.successSurface,

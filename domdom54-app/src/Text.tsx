@@ -5,7 +5,6 @@ import {
   ScrollView,
   View,
   TextInput,
-  TouchableOpacity,
   ActivityIndicator,
   Keyboard,
   ToastAndroid,
@@ -14,6 +13,7 @@ import { Ionicons, MaterialCommunityIcons } from "@expo/vector-icons";
 import styles from "./styles/Styles";
 import colors from "./styles/colors";
 import { Banner, Body, Card } from "./components/Layout";
+import { PrimaryButton } from "./components/PrimaryButton";
 import { useNavigation } from "@react-navigation/native";
 import { StackNavigationProp } from "@react-navigation/stack";
 import { useAudioPlayback } from "./hooks/useAudioPlayback";
@@ -310,46 +310,44 @@ export default function TextPage() {
         )}
       </Card>
 
-      <View style={styles.buttonContainer}>
-        <TouchableOpacity style={styles.buttonIcon} onPress={getRandomPhrase}>
-          <Ionicons name="bulb-outline" size={48} color={colors.textInverse} />
-          <Text style={styles.buttonText}>Generate Wisdom</Text>
-        </TouchableOpacity>
-      </View>
+      <PrimaryButton
+        label="Generate Wisdom"
+        onPress={getRandomPhrase}
+        renderIcon={(color) => (
+          <Ionicons name="bulb-outline" size={48} color={color} />
+        )}
+      />
 
-      <View style={styles.buttonContainer}>
-        <TouchableOpacity style={styles.buttonIcon} onPress={handleSearchPress}>
+      <PrimaryButton
+        label="Search"
+        onPress={handleSearchPress}
+        renderIcon={(color) => (
           <MaterialCommunityIcons
             name="comment-search-outline"
             size={48}
-            color={colors.textInverse}
+            color={color}
           />
-          <Text style={styles.buttonText}>Search</Text>
-        </TouchableOpacity>
-      </View>
+        )}
+      />
 
-      <View style={styles.buttonContainer}>
-        <TouchableOpacity
-          style={styles.buttonIcon}
-          onPress={() =>
-            navigation.navigate("Discuss", { discussPhrase: phrase?.phrase ?? "" })
-          }
-          disabled={!phrase || loading}
-        >
-          <Ionicons name="chatbubbles-sharp" size={48} color={colors.textInverse} />
-          <Text style={styles.buttonText}>Discuss</Text>
-        </TouchableOpacity>
-      </View>
+      <PrimaryButton
+        label="Discuss"
+        onPress={() =>
+          navigation.navigate("Discuss", { discussPhrase: phrase?.phrase ?? "" })
+        }
+        disabled={!phrase || loading}
+        renderIcon={(color) => (
+          <Ionicons name="chatbubbles-sharp" size={48} color={color} />
+        )}
+      />
     </ScrollView>
   );
 }
 
 const wisdomStyles = StyleSheet.create({
-  // Composed onto `styles.input`. The 5px radius is this screen's own - every other
-  // field in the app uses the shared 8px, so this is drift worth a design decision.
+  // Composed onto `styles.input`.
   input: {
     width: "80%",
-    borderRadius: 5,
     margin: 10,
     paddingTop: 12,
     paddingBottom: 12,

@@ -113,6 +113,12 @@ export default StyleSheet.create({
     padding: 16,
   },
 
+  // `buttonText`'s marginLeft is the gap after the icon, so a button with no icon
+  // (Contact's) has to drop it or its label sits 10px off centre.
+  buttonTextNoIcon: {
+    marginLeft: 0,
+  },
+
   // The shared text-input control. Contact, Discuss and Wisdom each had their own
   // full copy of these five properties; the radius and padding stay local because
   // the three fields are genuinely different sizes.
@@ -125,8 +131,7 @@ export default StyleSheet.create({
     justifyContent: "space-between",
   },
 
-  // Elevation. Two steps, matching the two that were hand-rolled in Contact and
-  // Discuss. `shadowColor` is always black - it darkens a surface, it is not a
+  // Elevation. `shadowColor` is always black - it darkens a surface, it is not a
   // palette colour, which is why it is not a token choice.
   shadowSm: {
     shadowColor: colors.shadow,
@@ -134,13 +139,6 @@ export default StyleSheet.create({
     shadowOpacity: 0.1,
     shadowRadius: 2,
     elevation: 2,
-  },
-  shadowMd: {
-    shadowColor: colors.shadow,
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.1,
-    shadowRadius: 3,
-    elevation: 3,
   },
 
   input: {
