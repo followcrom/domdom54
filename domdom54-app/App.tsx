@@ -24,7 +24,6 @@ type NotificationData = {
   title: string;
   body: string;
   imageUrl: string | null;
-  url: string | null;
   audio: string | null;
 };
 

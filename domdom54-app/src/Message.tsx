@@ -38,7 +38,6 @@ export type MessageData = {
   title: string;
   body: string;
   imageUrl: string | null;
-  url: string | null;
   audio: string | null;
 };
 
@@ -53,7 +52,6 @@ const defaultMessage: MessageData = {
     body: "You have 0 new messages. Hold tight, wisdom is on the way.",
     id: undefined,
     imageUrl: null,
-    url: null,
     audio: null,
 };
 
@@ -106,7 +104,7 @@ export default function Message() {
     }
   }, [route.params]);
 
-  const { id, title, body, imageUrl, url, audio } = messageData;
+  const { id, title, body, imageUrl, audio } = messageData;
 
   const showId = () => {
     ToastAndroid.show(id ? id.toString() : "No ID", ToastAndroid.SHORT);
@@ -155,32 +153,6 @@ export default function Message() {
               <Text style={messageStyles.audioError}>{audioError}</Text>
             )}
           </View>
-        )}
-        {/* Renders only when the push payload carries a `url`. Senders currently
-            omit it, so the button stays hidden — but leaving this live means a
-            future URL needs only a payload change, not an app release. */}
-        {url && (
-          <TouchableOpacity
-            style={messageStyles.button}
-            onPress={() => Linking.openURL(url)}
-            activeOpacity={0.8}
-          >
-            <View style={messageStyles.buttonContent}>
-              <Ionicons 
-                name="globe-outline" 
-                size={24} 
-                color="white" 
-                style={messageStyles.buttonIcon}
-              />
-              <Text style={messageStyles.buttonText}>Visit Link</Text>
-              <Ionicons 
-                name="arrow-forward" 
-                size={20} 
-                color="white" 
-                style={messageStyles.buttonArrow}
-              />
-            </View>
-          </TouchableOpacity>
         )}
       </Card>
 
@@ -235,7 +207,8 @@ const messageStyles = StyleSheet.create({
   },
   fullScreenClose: {
     position: "absolute",
-    right: 15,
+    left: "50%",
+    marginLeft: -20, // Half the icon size to center it
   },
   audioContainer: {
     alignItems: "center",
@@ -260,43 +233,43 @@ const messageStyles = StyleSheet.create({
     height: 200,
     resizeMode: "cover",
   },
-  button: {
-    width: "85%",
-    alignSelf: "center",
-    backgroundColor: "#007BFF",
-    paddingVertical: 16,
-    paddingHorizontal: 20,
-    borderRadius: 16,
-    alignItems: "center",
-    marginVertical: 15,
-    shadowColor: "#007BFF",
-    shadowOffset: {
-      width: 0,
-      height: 6,
-    },
-    shadowOpacity: 0.4,
-    shadowRadius: 12,
-    elevation: 10,
-    transform: [{ scale: 1 }],
-  },
-  buttonContent: {
-    flexDirection: "row",
-    alignItems: "center",
-    justifyContent: "center",
-    minHeight: 24,
-  },
-  buttonIcon: {
-    marginRight: 12,
-  },
-  buttonArrow: {
-    marginLeft: 8,
-    opacity: 0.8,
-  },
-  buttonText: {
-    color: "white",
-    fontSize: 18,
-    fontWeight: "700",
-    letterSpacing: 1,
-    textTransform: "uppercase",
-  },
+  // button: {
+  //   width: "85%",
+  //   alignSelf: "center",
+  //   backgroundColor: "#007BFF",
+  //   paddingVertical: 16,
+  //   paddingHorizontal: 20,
+  //   borderRadius: 16,
+  //   alignItems: "center",
+  //   marginVertical: 15,
+  //   shadowColor: "#007BFF",
+  //   shadowOffset: {
+  //     width: 0,
+  //     height: 6,
+  //   },
+  //   shadowOpacity: 0.4,
+  //   shadowRadius: 12,
+  //   elevation: 10,
+  //   transform: [{ scale: 1 }],
+  // },
+  // buttonContent: {
+  //   flexDirection: "row",
+  //   alignItems: "center",
+  //   justifyContent: "center",
+  //   minHeight: 24,
+  // },
+  // buttonIcon: {
+  //   marginRight: 12,
+  // },
+  // buttonArrow: {
+  //   marginLeft: 8,
+  //   opacity: 0.8,
+  // },
+  // buttonText: {
+  //   color: "white",
+  //   fontSize: 18,
+  //   fontWeight: "700",
+  //   letterSpacing: 1,
+  //   textTransform: "uppercase",
+  // },
 });

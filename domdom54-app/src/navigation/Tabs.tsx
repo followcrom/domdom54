@@ -44,7 +44,7 @@ const screenIcons: Record<TabName, { focused: MaterialCommunityIconName; unfocus
   Wisdom: { focused: 'lightbulb-on', unfocused: 'lightbulb-on-outline' },
   Meditations: { focused: 'head-heart', unfocused: 'head-heart-outline' },
   Moments: { focused: 'kettle-steam', unfocused: 'kettle-steam-outline' },
-  Messages: { focused: 'message-text', unfocused: 'message-text-outline' },
+  Messages: { focused: 'hand-heart', unfocused: 'hand-heart-outline' },
   Settings: { focused: 'cog', unfocused: 'cog-outline' },
 };
 
@@ -191,12 +191,12 @@ export default function BottomTabs() {
           headerStyle,
           headerTitle: () => (
             <View style={styles.headerTitleContainer}>
-              <Text style={[styles.headerTitleText, { marginRight: 15 }]}>
+              <Text style={[styles.headerTitleText, { marginRight: 10 }]}>
                 Moments
               </Text>
               <MaterialCommunityIcons 
-                name="thought-bubble-outline" 
-                size={36} 
+                name="meteor" 
+                size={40} 
                 color="#12abef" 
               />
             </View>
@@ -234,8 +234,8 @@ export default function BottomTabs() {
           headerTitle: () => (
             <View style={styles.headerTitleContainer}>
               <MaterialCommunityIcons
-                name="cellphone-message"
-                size={34}
+                name="account-wrench"
+                size={40}
                 color="#12abef"
               />
               <Text style={[styles.headerTitleText, { marginLeft: 12 }]}>

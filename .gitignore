@@ -41,3 +41,6 @@ docs/
 
 # Builds
 builds/
+
+# FCM Credentials
+domdom54-app/google-services.json
