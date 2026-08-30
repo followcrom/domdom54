@@ -9,6 +9,7 @@ import {
 import { Ionicons } from "@expo/vector-icons";
 import { useAudioPlayer, useAudioPlayerStatus, setAudioModeAsync } from "expo-audio";
 import styles from "./styles/Styles";
+import colors from "./styles/colors";
 import { useNavigation } from "@react-navigation/native";
 import { StackNavigationProp } from "@react-navigation/stack";
 
@@ -156,35 +157,39 @@ useEffect(() => {
         <Ionicons
           name="play-skip-back-circle-outline"
           size={48}
-          color="#007BFF"
+          color={colors.textSecondary}
           onPress={playPrevious}
           disabled={currentIndex === null}
         />
         <Ionicons
           name="reload-circle-outline"
           size={48}
-          color="#f39b51"
+          color={colors.textSecondary}
           onPress={() => repeatCurrent()}
           disabled={currentIndex === null}
         />
         <Ionicons
+          // Larger than its neighbours, and the only transport control that carries colour:
+          // size marks the primary action, colour is reserved for state. The rest of the row
+          // is textSecondary because skipping and stopping are secondary to playing - five
+          // identical blue icons read as a wall rather than a control.
           name={isPlaying ? "pause-circle-outline" : "play-circle-outline"}
-          size={48}
-          color={isPlaying ? "#a999d2" : "green"}
+          size={56}
+          color={isPlaying ? colors.accentStrong : colors.brand}
           onPress={() => playAudio(currentIndex ?? 0)}
           disabled={audioFiles.length === 0}
         />
         <Ionicons
           name="stop-circle-outline"
           size={48}
-          color="red"
+          color={colors.textSecondary}
           onPress={stopSound}
           disabled={currentIndex === null}
         />
         <Ionicons
           name="play-skip-forward-circle-outline"
           size={48}
-          color="#007BFF"
+          color={colors.textSecondary}
           onPress={playNext}
           disabled={currentIndex === null}
         />
@@ -199,10 +204,10 @@ useEffect(() => {
               {
                 backgroundColor:
                   index === currentIndex
-                    ? "#007BFF"
+                    ? colors.brandStrong
                     : index % 2 === 0
-                    ? "#e0e0e0"
-                    : "white",
+                    ? colors.alt
+                    : colors.card,
               },
             ]}
             onPress={() => playAudio(index)}
@@ -210,7 +215,7 @@ useEffect(() => {
             <Text
               style={[
                 styles.listItemText,
-                { color: index === currentIndex ? "white" : "#007BFF" },
+                { color: index === currentIndex ? colors.textInverse : colors.brandDeep },
               ]}
             >
               {item.name}
@@ -230,6 +235,6 @@ const speechPageStyles = StyleSheet.create({
     justifyContent: "space-evenly",
     alignItems: "center",
     padding: 10,
-    backgroundColor: "white",
+    backgroundColor: colors.page,
   },
 });

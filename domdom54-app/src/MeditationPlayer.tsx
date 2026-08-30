@@ -10,6 +10,7 @@ import {
 import { useAudioPlayer, useAudioPlayerStatus, setAudioModeAsync } from "expo-audio";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import styles from "./styles/Styles";
+import colors from "./styles/colors";
 import { Banner, useIsLandscape } from "./components/Layout";
 import { Ionicons, MaterialCommunityIcons } from "@expo/vector-icons";
 import { RouteProp, useRoute, useNavigation } from "@react-navigation/native";
@@ -187,13 +188,13 @@ export default function MeditationPlayer() {
           <Ionicons
             name="close-circle-outline"
             size={40}
-            color="white"
+            color={colors.textInverse}
             onPress={() => navigation.goBack()}
           />
         </View>
         <Banner />
 
-        {isLoading && <ActivityIndicator size="large" color="#fff" />}
+        {isLoading && <ActivityIndicator size="large" color={colors.textInverse} />}
 
         <Text style={playerStyles.title}>{title}</Text>
 
@@ -203,7 +204,7 @@ export default function MeditationPlayer() {
               style={styles.transportButtonsStyle}
               name="rewind-10"
               size={36}
-              color="blue"
+              color={colors.brand}
               onPress={rewind10}
             />
 
@@ -211,7 +212,7 @@ export default function MeditationPlayer() {
               style={styles.transportButtonsStyle}
               name={isPlaying ? "pause-circle-outline" : "play-circle-outline"}
               size={48}
-              color={isPlaying ? "orange" : "green"}
+              color={isPlaying ? colors.accentStrong : colors.brand}
               onPress={togglePlayPause}
             />
 
@@ -219,7 +220,7 @@ export default function MeditationPlayer() {
               style={styles.transportButtonsStyle}
               name="stop-circle-outline"
               size={48}
-              color="red"
+              color={colors.brand}
               onPress={stopAndReset}
             />
 
@@ -227,7 +228,7 @@ export default function MeditationPlayer() {
               style={styles.transportButtonsStyle}
               name="fast-forward-10"
               size={36}
-              color="blue"
+              color={colors.brand}
               onPress={fastForward10}
             />
           </View>
@@ -240,7 +241,7 @@ export default function MeditationPlayer() {
                   height: 20,
                   borderRadius: 10,
                   width: `${progress}%`,
-                  backgroundColor: "#12abef",
+                  backgroundColor: colors.brand,
                 }}
               />
             </View>
@@ -271,7 +272,7 @@ const playerStyles = StyleSheet.create({
     top: 0,
     left: 0,
     right: 0,
-    backgroundColor: 'rgba(255,255,255,0.5)', // semi-opaque white
+    backgroundColor: colors.scrimStatusBar,
     zIndex: 10,
   },
   closeContainer: {
@@ -280,27 +281,27 @@ const playerStyles = StyleSheet.create({
   },
     transportContainer: {
     width: "90%",
-    backgroundColor: "rgba(255, 255, 255, 0.8)", // Semi-transparent white
+    backgroundColor: colors.scrimPanel,
     borderRadius: 10,
     margin: 20,
   },
     transportContainerLandscape: {
     width: "80%",
-    backgroundColor: "rgba(255, 255, 255, 0.8)", // Semi-transparent white
+    backgroundColor: colors.scrimPanel,
     borderRadius: 10,
     margin: 20,
   },
   title: {
     textAlign: "center",
     fontWeight: "bold",
-    color: "#fff",
+    color: colors.textInverse,
     fontSize: 30,
     paddingVertical: 10,
   },
   currPlay: {
     textAlign: "center",
     fontWeight: "bold",
-    color: "#FF7F00",
+    color: colors.accentStrong,
     fontSize: 18,
     paddingVertical: 10,
   },
@@ -322,8 +323,8 @@ const playerStyles = StyleSheet.create({
     alignItems: "center",
     width: "80%",
     height: 24,
-    backgroundColor: "white",
-    borderColor: "#007BFF",
+    backgroundColor: colors.card,
+    borderColor: colors.brand,
     borderWidth: 2,
     borderRadius: 20,
     overflow: "hidden",

@@ -11,6 +11,7 @@ import {
 import { Ionicons } from "@expo/vector-icons";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import styles from "./styles/Styles";
+import colors from "./styles/colors";
 import { Body } from "./components/Layout";
 
 type MeditationLogEntry = {
@@ -23,7 +24,10 @@ type Props = {
   onClose: () => void;
 };
 
-const ROW_COLORS = ["#e8f4fd", "#fff9e6"];
+// Deferred: this sheet is moving into Settings and will be redesigned there. These two
+// stripes are only 1.06:1 apart, which is close to no stripe at all without colour -
+// left alone on purpose, to be fixed as part of the move rather than twice.
+const ROW_COLORS = [colors.historyRowA, colors.historyRowB];
 
 export default function MeditationHistory({ visible, onClose }: Props) {
   const [meditationLog, setMeditationLog] = useState<MeditationLogEntry[]>([]);
@@ -97,10 +101,10 @@ export default function MeditationHistory({ visible, onClose }: Props) {
             <Text style={[styles.title, localStyles.modalTitle]}>Meditation History</Text>
             <View style={localStyles.headerButtons}>
               <TouchableOpacity onPress={exportLog} style={localStyles.closeButton}>
-                <Ionicons name="share-outline" size={24} color="#007BFF" />
+                <Ionicons name="share-outline" size={24} color={colors.brand} />
               </TouchableOpacity>
               <TouchableOpacity onPress={onClose} style={localStyles.closeButton}>
-                <Ionicons name="close-circle-outline" size={24} color="#007BFF" />
+                <Ionicons name="close-circle-outline" size={24} color={colors.brand} />
               </TouchableOpacity>
             </View>
           </View>
@@ -134,7 +138,7 @@ export default function MeditationHistory({ visible, onClose }: Props) {
                       style={localStyles.deleteButton}
                       hitSlop={{ top: 8, bottom: 8, left: 8, right: 8 }}
                     >
-                      <Ionicons name="trash-outline" size={20} color="#cc3333" />
+                      <Ionicons name="trash-outline" size={20} color={colors.danger} />
                     </TouchableOpacity>
                   </View>
                 );
@@ -150,11 +154,11 @@ export default function MeditationHistory({ visible, onClose }: Props) {
 const localStyles = StyleSheet.create({
   overlay: {
     flex: 1,
-    backgroundColor: "rgba(0,0,0,0.5)",
+    backgroundColor: colors.scrimOverlay,
     justifyContent: "flex-end",
   },
   sheet: {
-    backgroundColor: "#fff",
+    backgroundColor: colors.card,
     borderTopLeftRadius: 20,
     borderTopRightRadius: 20,
     maxHeight: "80%",
@@ -197,7 +201,7 @@ const localStyles = StyleSheet.create({
   rowText: {
     flex: 1,
     fontSize: 16,
-    color: "#333",
+    color: colors.textPrimary,
   },
   deleteButton: {
     marginLeft: 12,

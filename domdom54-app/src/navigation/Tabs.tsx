@@ -2,6 +2,7 @@ import React from 'react';
 import { View, Text, StyleSheet, TouchableOpacity } from 'react-native';
 import { createBottomTabNavigator } from '@react-navigation/bottom-tabs';
 import { MaterialCommunityIcons } from '@expo/vector-icons';
+import colors from "../styles/colors";
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { BottomTabBarProps } from '@react-navigation/bottom-tabs';
 
@@ -103,7 +104,12 @@ function CustomTabBar({ state, descriptors, navigation }: BottomTabBarProps) {
         }
 
         const iconName = isFocused ? icons.focused : icons.unfocused;
-        const color = isFocused ? '#FF4500' : 'gray';
+        // Two oranges, not one. The 34px icon is a graphic and needs 3:1; the 12px label
+        // is text and needs 4.5:1. Small type needs more contrast than a large mark to
+        // *look* equally weighted, so the darker label reads as the same colour, not a
+        // different one.
+        const iconColor = isFocused ? colors.accent : colors.textDisabled;
+        const labelColor = isFocused ? colors.accentStrong : colors.textSecondary;
 
         return (
           <TouchableOpacity
@@ -116,10 +122,10 @@ function CustomTabBar({ state, descriptors, navigation }: BottomTabBarProps) {
             <MaterialCommunityIcons
               name={iconName}
               size={34}
-              color={color}
+              color={iconColor}
             />
             <Text
-              style={[styles.tabBarLabel, { color }]}
+              style={[styles.tabBarLabel, { color: labelColor }]}
               numberOfLines={1}
             >
               {label}
@@ -147,7 +153,7 @@ export default function BottomTabs() {
   const HEADER_CONTENT_HEIGHT = 66;
 
   const headerStyle = {
-    backgroundColor: "white",
+    backgroundColor: colors.card,
     height: HEADER_CONTENT_HEIGHT + insets.top,
   };
 
@@ -175,7 +181,7 @@ export default function BottomTabs() {
               <MaterialCommunityIcons
                 name="face-man-shimmer"
                 size={34}
-                color="#12abef"
+                color={colors.brand}
                 style={{ marginTop: 5 }}
               />
             </View>
@@ -197,7 +203,7 @@ export default function BottomTabs() {
               <MaterialCommunityIcons 
                 name="meteor" 
                 size={40} 
-                color="#12abef" 
+                color={colors.brand} 
               />
             </View>
           ),
@@ -212,14 +218,14 @@ export default function BottomTabs() {
           headerStyle,
           headerTitle: () => (
             <View style={styles.headerTitleContainer}>
+              <Text style={[styles.headerTitleText, { marginRight: 10 }]}>
+                Meditations
+              </Text>
               <MaterialCommunityIcons
                 name="meditation"
                 size={40}
-                color="#12abef"
+                color={colors.brand}
               />
-              <Text style={[styles.headerTitleText, { marginLeft: 12 }]}>
-                Meditations
-              </Text>
             </View>
           ),
         }}
@@ -233,14 +239,14 @@ export default function BottomTabs() {
           headerStyle,
           headerTitle: () => (
             <View style={styles.headerTitleContainer}>
-              <MaterialCommunityIcons
-                name="account-wrench"
-                size={40}
-                color="#12abef"
-              />
-              <Text style={[styles.headerTitleText, { marginLeft: 12 }]}>
+              <Text style={[styles.headerTitleText, { marginRight: 10 }]}>
                 Messages
               </Text>
+              <MaterialCommunityIcons
+                name="weather-partly-cloudy"
+                size={40}
+                color={colors.brand}
+              />
             </View>
           ),
         }}
@@ -254,14 +260,14 @@ export default function BottomTabs() {
           headerStyle,
           headerTitle: () => (
             <View style={styles.headerTitleContainer}>
-              <MaterialCommunityIcons
-                name="account-settings"
-                size={36}
-                color="#12abef"
-              />
-              <Text style={[styles.headerTitleText, { marginLeft: 10 }]}>
+              <Text style={[styles.headerTitleText, { marginRight: 10 }]}>
                 Settings
               </Text>
+              <MaterialCommunityIcons
+                name="account-wrench"
+                size={40}
+                color={colors.brand}
+              />
             </View>
           ),
         }}
@@ -297,14 +303,14 @@ export default function BottomTabs() {
           headerStyle,
           headerTitle: () => (
             <View style={styles.headerTitleContainer}>
-              <MaterialCommunityIcons
-                name="chat-plus-outline"
-                size={34}
-                color="#12abef"
-              />
-              <Text style={[styles.headerTitleText, { marginLeft: 15 }]}>
+                <Text style={[styles.headerTitleText, { marginRight: 10 }]}>
                 Discuss
               </Text>
+              <MaterialCommunityIcons
+                name="chat-plus-outline"
+                size={40}
+                color={colors.brand}
+              />
             </View>
           ),
         }}
@@ -318,10 +324,10 @@ const styles = StyleSheet.create({
   tabBarContainer: {
     flexDirection: 'row',
     borderTopWidth: 2,
-    borderTopColor: "#000",
+    borderTopColor: colors.divider,
     paddingTop: 5,
     paddingHorizontal: 2,
-    backgroundColor: 'white',
+    backgroundColor: colors.card,
   },
   tabBarItem: {
     flex: 1,
@@ -343,7 +349,7 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
   },
   homeHeaderText: {
-    color: "#007BFF",
+    color: colors.brandStrong,
     fontSize: 40,
     fontWeight: "bold",
     textAlign: 'center',
@@ -355,7 +361,7 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
   },
   headerTitleText: {
-    color: "#12abef",
+    color: colors.brandStrong,
     fontSize: 38,
     fontWeight: "bold",
   },

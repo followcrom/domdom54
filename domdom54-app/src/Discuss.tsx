@@ -11,6 +11,7 @@ import {
   KeyboardAvoidingView,
 } from "react-native";
 import styles from "./styles/Styles";
+import colors from "./styles/colors";
 import { Banner, Card } from "./components/Layout";
 import { Ionicons } from "@expo/vector-icons";
 import {
@@ -305,7 +306,7 @@ export default function Discuss() {
             <View style={{ paddingHorizontal: 10 }}>
             {loading && conversationHistory.length === 0 ? (
               <View style={discussPageStyles.loadingContainer}>
-              <ActivityIndicator size="large" color="#0000ff" />
+              <ActivityIndicator size="large" color={colors.brand} />
               <Text style={discussPageStyles.loadingText}>
                 followCrom is thinking...
               </Text>
@@ -317,7 +318,7 @@ export default function Discuss() {
             )}
             </View>
           {loading && conversationHistory.length > 0 && (
-            <ActivityIndicator size="small" style={{ margin: 10 }} color="#0000ff" />
+            <ActivityIndicator size="small" style={{ margin: 10 }} color={colors.brand} />
           )}
         </Card>
 
@@ -330,7 +331,7 @@ export default function Discuss() {
             value={userInput}
             onChangeText={setUserInput}
             onSubmitEditing={handleSubmitEditing}
-            placeholderTextColor="#A9A9A9"
+            placeholderTextColor={colors.textSecondary}
             multiline={false}
             returnKeyType="send"
             blurOnSubmit={true}
@@ -339,12 +340,12 @@ export default function Discuss() {
           />
         </Card>
 
-        <View style={styles.buttonContainer}>
+        <View style={[
+          styles.buttonContainer,
+          (loading || !userInput.trim()) && styles.buttonContainerDisabled,
+        ]}>
           <TouchableOpacity 
-            style={[
-              styles.buttonIcon,
-              loading && discussPageStyles.buttonDisabled
-            ]} 
+            style={styles.buttonIcon} 
             onPress={handleFollowUp}
             disabled={loading || !userInput.trim()}
             accessibilityLabel="Ask followCrom"
@@ -353,11 +354,11 @@ export default function Discuss() {
             <Ionicons 
               name="chatbubbles-sharp" 
               size={48} 
-              color={loading || !userInput.trim() ? "#cccccc" : "white"} 
+              color={loading || !userInput.trim() ? colors.textDisabled : colors.textInverse} 
             />
             <Text style={[
               styles.buttonText,
-              (loading || !userInput.trim()) && discussPageStyles.buttonTextDisabled
+              (loading || !userInput.trim()) && styles.buttonTextDisabled
             ]}>
               {loading ? "Asking..." : "Ask away!"}
             </Text>
@@ -372,15 +373,15 @@ export default function Discuss() {
 const discussPageStyles = StyleSheet.create({
   input: {
     width: "100%",
-    borderColor: "#ddd",
+    borderColor: colors.border,
     borderWidth: 1,
     borderRadius: 8,
     padding: 12,
     fontSize: 16,
-    color: "#333",
-    backgroundColor: "#FFFFFF",
+    color: colors.textPrimary,
+    backgroundColor: colors.card,
     minHeight: 44,
-    shadowColor: "#000",
+    shadowColor: colors.shadow,
     shadowOffset: {
       width: 0,
       height: 1,
@@ -396,14 +397,8 @@ const discussPageStyles = StyleSheet.create({
   loadingText: {
     marginTop: 10,
     fontSize: 16,
-    color: "#666",
+    color: colors.textSecondary,
     fontStyle: "italic",
-  },
-  buttonDisabled: {
-    opacity: 0.6,
-  },
-  buttonTextDisabled: {
-    color: "#cccccc",
   },
   bubble: {
     padding: 12,
@@ -412,19 +407,19 @@ const discussPageStyles = StyleSheet.create({
     maxWidth: '85%',
   },
   userBubble: {
-    backgroundColor: '#007AFF',
+    backgroundColor: colors.brandStrong,
     alignSelf: 'flex-end',
   },
   assistantBubble: {
-    backgroundColor: '#E5E5EA',
+    backgroundColor: colors.divider,
     alignSelf: 'flex-start',
   },
   userText: {
-    color: 'white',
+    color: colors.textInverse,
     fontSize: 16,
   },
   assistantText: {
-    color: 'black',
+    color: colors.textPrimary,
     fontSize: 16,
   },
 });

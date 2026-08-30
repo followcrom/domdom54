@@ -16,6 +16,7 @@ import { useRoute, RouteProp } from "@react-navigation/native";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import { useAudioPlayback } from "./hooks/useAudioPlayback";
 import styles from "./styles/Styles";
+import colors from "./styles/colors";
 import { Body, Card } from "./components/Layout";
 import { Ionicons } from "@expo/vector-icons";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
@@ -140,12 +141,12 @@ export default function Message() {
         {audio && audio !== null && (
           <View style={messageStyles.audioContainer}>
             {isLoadingPlayback ? (
-              <ActivityIndicator size="large" color="#007BFF" />
+              <ActivityIndicator size="large" color={colors.brand} />
             ) : (
               <Ionicons
                 name={isPlaying ? "pause-circle-outline" : "play-circle-outline"}
                 size={48}
-                color={isPlaying ? "orange" : "#007BFF"}
+                color={isPlaying ? colors.accentStrong : colors.brand}
                 onPress={togglePlayPause}
               />
             )}
@@ -182,7 +183,7 @@ export default function Message() {
         <Ionicons
           name="close-circle"
           size={40}
-          color="white"
+          color={colors.textInverse}
           onPress={() => setIsImageFullScreen(false)}
           style={[messageStyles.fullScreenClose, { top: insets.top + 10 }]}
         />
@@ -197,7 +198,7 @@ const messageStyles = StyleSheet.create({
   },
   fullScreenBackdrop: {
     flex: 1,
-    backgroundColor: "black",
+    backgroundColor: colors.scrimBackdrop,
     justifyContent: "center",
     alignItems: "center",
   },
@@ -219,11 +220,11 @@ const messageStyles = StyleSheet.create({
     borderTopWidth: 2,
     borderBottomWidth: 2,
     borderStyle: "dashed",
-    borderColor: "#007BFF",
+    borderColor: colors.brand,
     padding: 5,
   },
   audioError: {
-    color: "#e74c3c",
+    color: colors.danger,
     fontSize: 14,
     textAlign: "center",
     marginTop: 8,

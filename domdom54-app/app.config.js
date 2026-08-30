@@ -15,16 +15,11 @@ export default {
     runtimeVersion: "2.4.0",
     orientation: "default",
     icon: IS_DEV ? "./assets/dev_icon.png" : "./assets/icon.png",
-    userInterfaceStyle: "automatic", // let the app follow system light/dark mode
     newArchEnabled: true,
     splash: {
       image: "./assets/splash.png",
       resizeMode: "contain",
       backgroundColor: "#ffffff",
-      dark: {
-        backgroundColor: "#000000",
-        image: "./assets/splash.png",
-      },
     },
     scheme: IS_DEV ? "domdom52dev" : "domdom52",
     android: {

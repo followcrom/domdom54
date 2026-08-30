@@ -6,6 +6,7 @@ import {
   ImageBackground,
 } from 'react-native';
 import styles from './styles/Styles';
+import colors from "./styles/colors";
 import { useIsLandscape } from './components/Layout';
 
 export default function Home() {
@@ -41,6 +42,6 @@ const homePageStyles = StyleSheet.create({
   },
   landscapeContainer: {
     flex: 1,
-    backgroundColor: '#fff',
+    backgroundColor: colors.card,
   },
 });

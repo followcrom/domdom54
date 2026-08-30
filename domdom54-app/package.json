@@ -13,7 +13,8 @@
     "doctor": "expo-doctor",
     "typecheck": "tsc --noEmit",
     "deps:check": "expo install --check",
-    "deps:fix": "expo install --fix"
+    "deps:fix": "expo install --fix",
+    "check:colors": "node scripts/check-colors.mjs"
   },
   "dependencies": {
     "@expo/vector-icons": "~15.1.1",

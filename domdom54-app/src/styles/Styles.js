@@ -1,8 +1,10 @@
 import { StyleSheet } from "react-native";
+import colors from "./colors";
 
 export default StyleSheet.create({
   container: {
     flexGrow: 1,
+    backgroundColor: colors.page,
     justifyContent: "flex-start",
     alignItems: "center",
   },
@@ -16,7 +18,7 @@ export default StyleSheet.create({
     fontSize: 28,
     width: "80%",
     fontWeight: "bold",
-    color: "#007BFF",
+    color: colors.brandStrong,
     marginLeft: "10%",
     marginTop: 10,
     marginBottom: 0,
@@ -44,7 +46,7 @@ export default StyleSheet.create({
     alignSelf: "center",
     marginTop: 10,
     marginBottom: 10,
-    backgroundColor: "#fff",
+    backgroundColor: colors.card,
     borderRadius: 10,
   },
   textContainerLandscape: {
@@ -79,12 +81,25 @@ export default StyleSheet.create({
     width: 300,
     marginTop: 10,
     marginBottom: 10,
-    backgroundColor: "#007BFF",
-    borderColor: "#FFF",
+    backgroundColor: colors.brandStrong,
+    borderColor: colors.card,
     borderWidth: 2.5,
     borderRadius: 20,
     padding: 10,
     alignSelf: "center",
+  },
+
+  // Disabled primary button. Not a dimmed blue fill - white-on-blue at 2.48:1 reads as
+  // broken rather than unavailable - and not `alt`, which is now dark enough that a
+  // textDisabled label would fall to 2.75:1 on it. A white fill with a border outline
+  // keeps the label at 3.57:1.
+  buttonContainerDisabled: {
+    backgroundColor: colors.card,
+    borderColor: colors.border,
+  },
+
+  buttonTextDisabled: {
+    color: colors.textDisabled,
   },
 
   buttonIcon: {
@@ -94,13 +109,13 @@ export default StyleSheet.create({
   buttonText: {
     fontSize: 20,
     fontWeight: "bold",
-    color: "white",
+    color: colors.textInverse,
     marginLeft: 10,
     padding: 16,
   },
 
   divider: {
-    borderBottomColor: "#007BFF",
+    borderBottomColor: colors.brand,
     borderBottomWidth: 2,
     marginLeft: "8%",
     width: "84%",
@@ -116,12 +131,12 @@ export default StyleSheet.create({
   listItem: {
     paddingVertical: 18,
     borderBottomWidth: 1,
-    borderBottomColor: "#ccc",
+    borderBottomColor: colors.divider,
   },
 
   listItemText: {
     textAlign: "center",
-    color: "#007BFF",
+    color: colors.brandDeep,
     fontSize: 20,
   },
 
@@ -134,7 +149,7 @@ export default StyleSheet.create({
   borderTopWidth: 2,
   borderBottomWidth: 2,
   borderStyle: "dashed",
-  borderColor: "#007BFF",
+  borderColor: colors.brand,
   padding: 5,
 },
 });

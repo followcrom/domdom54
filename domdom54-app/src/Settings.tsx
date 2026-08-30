@@ -19,6 +19,7 @@ import { saveToken, deleteToken } from "./pushTokenStore";
 import Constants from "expo-constants";
 import * as Device from "expo-device";
 import styles from "./styles/Styles";
+import colors from "./styles/colors";
 import { Card } from "./components/Layout";
 import { useNavigation } from "@react-navigation/native";
 import { StackNavigationProp } from "@react-navigation/stack";
@@ -124,11 +125,11 @@ function Row({ label, value, onPress, busy, last }: RowProps) {
     <View style={[settingsStyles.row, last && settingsStyles.rowLast]}>
       <Text style={settingsStyles.rowLabel}>{label}</Text>
       {busy ? (
-        <ActivityIndicator size="small" color="#007BFF" />
+        <ActivityIndicator size="small" color={colors.brand} />
       ) : value ? (
         <Text style={settingsStyles.rowValue}>{value}</Text>
       ) : onPress ? (
-        <Ionicons name="chevron-forward" size={20} color="#9aa2ad" />
+        <Ionicons name="chevron-forward" size={20} color={colors.textSecondary} />
       ) : null}
     </View>
   );
@@ -344,7 +345,7 @@ export default function Settings() {
           <Text style={settingsStyles.heading}>Notifications</Text>
           {busy ? (
             <View style={settingsStyles.switchControl}>
-              <ActivityIndicator size="small" color="#007BFF" />
+              <ActivityIndicator size="small" color={colors.brand} />
             </View>
           ) : (
             <View style={settingsStyles.switchControl}>
@@ -352,8 +353,10 @@ export default function Settings() {
                 value={switchOn}
                 onValueChange={handleToggle}
                 disabled={osPermission === "checking" || isPermissionBlocked}
-                trackColor={{ false: "#ccc", true: "#9ecbff" }}
-                thumbColor={switchOn ? "#007BFF" : "#f4f3f4"}
+                // The track carries the state and the thumb stays white, so the on state
+                // reads at 3.59:1 rather than the 1.69:1 of the old pale-blue track.
+                trackColor={{ false: colors.divider, true: colors.brand }}
+                thumbColor={colors.card}
                 accessibilityRole="switch"
                 accessibilityLabel="Receive push notifications"
               />
@@ -416,7 +419,7 @@ const settingsStyles = StyleSheet.create({
   heading: {
     fontSize: 24,
     fontWeight: "bold",
-    color: "#007BFF",
+    color: colors.brandStrong,
     flexShrink: 1,
   },
   cardHeading: {
@@ -438,12 +441,12 @@ const settingsStyles = StyleSheet.create({
   },
   statusLine: {
     fontSize: 16,
-    color: "#444",
+    color: colors.textSecondary,
     marginTop: 4,
   },
   link: {
     fontSize: 16,
-    color: "#007BFF",
+    color: colors.brandStrong,
     textDecorationLine: "underline",
     marginTop: 10,
   },
@@ -456,18 +459,18 @@ const settingsStyles = StyleSheet.create({
     minHeight: 52,
     paddingVertical: 12,
     borderBottomWidth: 1,
-    borderBottomColor: "#e2e2e2",
+    borderBottomColor: colors.divider,
   },
   rowLast: {
     borderBottomWidth: 0,
   },
   rowLabel: {
     fontSize: 18,
-    color: "#222",
+    color: colors.textPrimary,
     flexShrink: 1,
   },
   rowValue: {
     fontSize: 16,
-    color: "#666",
+    color: colors.textSecondary,
   },
 });

@@ -8,6 +8,7 @@ import {
 } from "react-native";
 import { MaterialCommunityIcons } from "@expo/vector-icons";
 import styles from "./styles/Styles";
+import colors from "./styles/colors";
 import { useNavigation } from "@react-navigation/native";
 import { StackNavigationProp } from "@react-navigation/stack";
 import MeditationHistory from "./MeditationHistory";
@@ -55,7 +56,7 @@ const TabBar: React.FC<TabBarProps> = React.memo(({ tabs, activeTab, setActiveTa
         justifyContent: "space-around",
         paddingTop: 20,
         paddingBottom: 15,
-        backgroundColor: "white",
+        backgroundColor: colors.card,
       }}
     >
       {tabs.map((tab, index) => (
@@ -66,10 +67,10 @@ const TabBar: React.FC<TabBarProps> = React.memo(({ tabs, activeTab, setActiveTa
         >
           <Text
             style={{
-              color: activeTab === index ? "#FF4500" : "grey",
+              color: activeTab === index ? colors.accentStrong : colors.textSecondary,
               borderBottomWidth: activeTab === index ? 2 : 0,
               borderBottomColor:
-                activeTab === index ? "#FF4500" : "transparent",
+                activeTab === index ? colors.accent : "transparent",
               fontSize: 18,
             }}
           >
@@ -89,7 +90,7 @@ const MeditationItem: React.FC<MeditationItemProps> = React.memo(({ item, index,
 
   const itemStyle = useMemo(() => [
     styles.listItem,
-    { backgroundColor: index % 2 === 0 ? "#e0e0e0" : "white" },
+    { backgroundColor: index % 2 === 0 ? colors.alt : colors.card },
   ], [index]);
 
   return (
@@ -168,7 +169,7 @@ export default function Meditations() {
           style={medPageStyles.historyButton}
           accessibilityLabel="View meditation history"
         >
-          <MaterialCommunityIcons name="history" size={28} color="#007BFF" />
+          <MaterialCommunityIcons name="history" size={28} color={colors.brand} />
         </TouchableOpacity>
       </View>
 
@@ -203,7 +204,7 @@ const medPageStyles = StyleSheet.create({
   headerRow: {
     flexDirection: "row",
     alignItems: "center",
-    backgroundColor: "white",
+    backgroundColor: colors.card,
   },
   tabBarWrapper: {
     flex: 1,

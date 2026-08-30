@@ -13,6 +13,7 @@ import {
 import { Ionicons } from "@expo/vector-icons";
 import { StackNavigationProp } from "@react-navigation/stack";
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
+import colors from './styles/colors';
 
 // Define types for form data and errors
 interface FormData {
@@ -163,7 +164,7 @@ export default function Contact({ navigation }: ContactProps) {
           <Ionicons
             name="close-circle-outline"
             size={40}
-            color="darkgrey"
+            color={colors.textSecondary}
             onPress={() => navigation.goBack()}
           />
         </View>
@@ -198,7 +199,7 @@ export default function Contact({ navigation }: ContactProps) {
               value={formData.name}
               onChangeText={(value) => handleInputChange('name', value)}
               placeholder="Enter your full name"
-              placeholderTextColor="#999"
+              placeholderTextColor={colors.textSecondary}
             />
             {errors.name && <Text style={contactStyles.errorText}>{errors.name}</Text>}
           </View>
@@ -211,7 +212,7 @@ export default function Contact({ navigation }: ContactProps) {
               value={formData.email}
               onChangeText={(value) => handleInputChange('email', value)}
               placeholder="Enter your email address"
-              placeholderTextColor="#999"
+              placeholderTextColor={colors.textSecondary}
               keyboardType="email-address"
               autoCapitalize="none"
             />
@@ -226,7 +227,7 @@ export default function Contact({ navigation }: ContactProps) {
               value={formData.subject}
               onChangeText={(value) => handleInputChange('subject', value)}
               placeholder="What is this about?"
-              placeholderTextColor="#999"
+              placeholderTextColor={colors.textSecondary}
             />
             {errors.subject && <Text style={contactStyles.errorText}>{errors.subject}</Text>}
           </View>
@@ -239,7 +240,7 @@ export default function Contact({ navigation }: ContactProps) {
               value={formData.message}
               onChangeText={(value) => handleInputChange('message', value)}
               placeholder="Enter your message here..."
-              placeholderTextColor="#999"
+              placeholderTextColor={colors.textSecondary}
               multiline
               numberOfLines={6}
               textAlignVertical="top"
@@ -253,7 +254,10 @@ export default function Contact({ navigation }: ContactProps) {
             onPress={handleSubmit}
             disabled={isLoading}
           >
-            <Text style={contactStyles.submitButtonText}>
+            <Text style={[
+              contactStyles.submitButtonText,
+              isLoading && contactStyles.submitButtonTextDisabled,
+            ]}>
               {isLoading ? 'Sending...' : 'Send Message'}
             </Text>
           </TouchableOpacity>
@@ -266,7 +270,7 @@ export default function Contact({ navigation }: ContactProps) {
 const contactStyles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: '#f8f9fa',
+    backgroundColor: colors.page,
   },
   scrollContent: {
     flexGrow: 1,
@@ -286,13 +290,13 @@ const contactStyles = StyleSheet.create({
   title: {
     fontSize: 28,
     fontWeight: 'bold',
-    color: '#333',
+    color: colors.textPrimary,
     marginBottom: 5,
     textAlign: 'center',
   },
   subtitle: {
     fontSize: 16,
-    color: '#666',
+    color: colors.textSecondary,
     marginBottom: 20,
     textAlign: 'center',
     lineHeight: 22,
@@ -303,43 +307,43 @@ const contactStyles = StyleSheet.create({
   label: {
     fontSize: 16,
     fontWeight: '600',
-    color: '#333',
+    color: colors.textPrimary,
     marginBottom: 8,
   },
   input: {
     borderWidth: 1,
-    borderColor: '#ddd',
+    borderColor: colors.border,
     borderRadius: 8,
     padding: 15,
     fontSize: 16,
-    backgroundColor: '#fff',
-    color: '#333',
+    backgroundColor: colors.card,
+    color: colors.textPrimary,
   },
   textArea: {
     borderWidth: 1,
-    borderColor: '#ddd',
+    borderColor: colors.border,
     borderRadius: 8,
     padding: 15,
     fontSize: 16,
-    backgroundColor: '#fff',
-    color: '#333',
+    backgroundColor: colors.card,
+    color: colors.textPrimary,
     minHeight: 100,
   },
   inputError: {
-    borderColor: '#e74c3c',
+    borderColor: colors.danger,
   },
   errorText: {
-    color: '#e74c3c',
+    color: colors.danger,
     fontSize: 14,
     marginTop: 5,
   },
   submitButton: {
-    backgroundColor: '#007bff',
+    backgroundColor: colors.brandStrong,
     borderRadius: 8,
     padding: 16,
     alignItems: 'center',
     marginTop: 0,
-    shadowColor: '#000',
+    shadowColor: colors.shadow,
     shadowOffset: {
       width: 0,
       height: 2,
@@ -348,17 +352,24 @@ const contactStyles = StyleSheet.create({
     shadowRadius: 3,
     elevation: 3,
   },
+  // Matches the primary button's disabled treatment: a white fill with a border outline
+  // rather than a grey slab, so the label stays legible at 3.57:1.
   submitButtonDisabled: {
-    backgroundColor: '#ccc',
+    backgroundColor: colors.card,
+    borderWidth: 1,
+    borderColor: colors.border,
   },
   submitButtonText: {
-    color: '#fff',
+    color: colors.textInverse,
     fontSize: 18,
     fontWeight: '600',
   },
+  submitButtonTextDisabled: {
+    color: colors.textDisabled,
+  },
   successBanner: {
-    backgroundColor: '#d4edda',
-    borderColor: '#c3e6cb',
+    backgroundColor: colors.successSurface,
+    borderColor: colors.success,
     borderWidth: 1,
     padding: 20,
     borderRadius: 8,
@@ -366,20 +377,20 @@ const contactStyles = StyleSheet.create({
     alignItems: 'center',
   },
   successBannerText: {
-    color: '#155724',
+    color: colors.success,
     fontSize: 16,
     fontWeight: '500',
     marginBottom: 12,
     textAlign: 'center',
   },
   successButton: {
-    backgroundColor: '#28a745',
+    backgroundColor: colors.success,
     paddingVertical: 10,
     paddingHorizontal: 20,
     borderRadius: 6,
   },
   successButtonText: {
-    color: '#fff',
+    color: colors.textInverse,
     fontSize: 16,
     fontWeight: '600',
   },

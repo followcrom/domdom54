@@ -12,6 +12,7 @@ import {
 } from "react-native";
 import { Ionicons, MaterialCommunityIcons } from "@expo/vector-icons";
 import styles from "./styles/Styles";
+import colors from "./styles/colors";
 import { Banner, Body, Card } from "./components/Layout";
 import { useNavigation } from "@react-navigation/native";
 import { StackNavigationProp } from "@react-navigation/stack";
@@ -237,7 +238,7 @@ export default function TextPage() {
           autoCorrect={false}
           autoCapitalize="none"
           placeholder="Search for wisdom ..."
-          placeholderTextColor="#888"
+          placeholderTextColor={colors.textSecondary}
         />
       )}
 
@@ -253,7 +254,7 @@ export default function TextPage() {
               style={styles.transportButtonsStyle}
               name="play-skip-back-outline"
               size={36}
-              color={index > 0 ? "orange" : "grey"}
+              color={index > 0 ? colors.brand : colors.textDisabled}
               onPress={handlePrevious}
               disabled={index === 0}
             />
@@ -261,7 +262,7 @@ export default function TextPage() {
               style={styles.transportButtonsStyle}
               name="play-skip-forward-outline"
               size={36}
-              color={index < results.length - 1 ? "green" : "grey"}
+              color={index < results.length - 1 ? colors.brand : colors.textDisabled}
               onPress={handleNext}
               disabled={index >= results.length - 1}
             />
@@ -276,7 +277,7 @@ export default function TextPage() {
       <Card>
         {loading ? (
           <View style={{ padding: 10 }}>
-            <ActivityIndicator size="large" color="#0000ff" />
+            <ActivityIndicator size="large" color={colors.brand} />
           </View>
         ) : (
           <>
@@ -291,12 +292,12 @@ export default function TextPage() {
             {phrase?.audio && (
               <View style={styles.audioContainer}>
                 {isLoadingPlayback ? (
-                  <ActivityIndicator size="large" color="#007BFF" />
+                  <ActivityIndicator size="large" color={colors.brand} />
                 ) : (
                   <Ionicons
                     name={isPlaying ? "pause-circle-outline" : "play-circle-outline"}
                     size={48}
-                    color={isPlaying ? "orange" : "#007BFF"}
+                    color={isPlaying ? colors.accentStrong : colors.brand}
                     onPress={togglePlayPause}
                   />
                 )}
@@ -311,7 +312,7 @@ export default function TextPage() {
 
       <View style={styles.buttonContainer}>
         <TouchableOpacity style={styles.buttonIcon} onPress={getRandomPhrase}>
-          <Ionicons name="bulb-outline" size={48} color="white" />
+          <Ionicons name="bulb-outline" size={48} color={colors.textInverse} />
           <Text style={styles.buttonText}>Generate Wisdom</Text>
         </TouchableOpacity>
       </View>
@@ -321,7 +322,7 @@ export default function TextPage() {
           <MaterialCommunityIcons
             name="comment-search-outline"
             size={48}
-            color="white"
+            color={colors.textInverse}
           />
           <Text style={styles.buttonText}>Search</Text>
         </TouchableOpacity>
@@ -335,7 +336,7 @@ export default function TextPage() {
           }
           disabled={!phrase || loading}
         >
-          <Ionicons name="chatbubbles-sharp" size={48} color="white" />
+          <Ionicons name="chatbubbles-sharp" size={48} color={colors.textInverse} />
           <Text style={styles.buttonText}>Discuss</Text>
         </TouchableOpacity>
       </View>
@@ -347,12 +348,12 @@ const wisdomStyles = StyleSheet.create({
   title: {
     fontSize: 28,
     fontWeight: "bold",
-    color: "#007BFF",
+    color: colors.brandStrong,
     marginTop: 10,
     textAlign: "center",
   },
   audioError: {
-    color: "#e74c3c",
+    color: colors.danger,
     fontSize: 14,
     textAlign: "center",
     marginTop: 8,
@@ -360,19 +361,19 @@ const wisdomStyles = StyleSheet.create({
   input: {
     width: "80%",
     fontSize: 16,
-    borderColor: "gray",
+    borderColor: colors.border,
     borderWidth: 1,
     borderRadius: 5,
     margin: 10,
     paddingTop: 12,
     paddingBottom: 12,
     paddingLeft: 12,
-    color: "black",
-    backgroundColor: "white",
+    color: colors.textPrimary,
+    backgroundColor: colors.card,
   },
   resultsTopline: {
     fontSize: 24,
-    color: "#007BFF",
+    color: colors.brandStrong,
     textAlign: "center",
     marginVertical: 10,
   },
@@ -382,7 +383,7 @@ const wisdomStyles = StyleSheet.create({
   },
   resultCount: {
     fontSize: 15,
-    color: "#FF7F00",
+    color: colors.accentStrong,
     textAlign: "center",
   },
 });

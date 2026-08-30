@@ -4,6 +4,7 @@ import {
   NavigationContainer,
   NavigationContainerRef,
   NavigatorScreenParams,
+  DefaultTheme,
 } from "@react-navigation/native";
 import * as Notifications from 'expo-notifications';
 import { createStackNavigator } from "@react-navigation/stack";
@@ -14,6 +15,7 @@ import BottomTabs from "./src/navigation/Tabs";
 import type { TabParamList } from "./src/navigation/Tabs";
 import MeditationPlayer from "./src/MeditationPlayer";
 import Contact from "./src/Contact";
+import colors from "./src/styles/colors";
 import type { EventSubscription } from 'expo-notifications';
 
 // --- Type Definitions ---
@@ -37,6 +39,24 @@ export type RootStackParamList = {
 };
 
 const Stack = createStackNavigator<RootStackParamList>();
+
+// The screen background used to come from React Navigation's DefaultTheme, which nothing
+// in this app had chosen - it just happened to be rgb(242, 242, 242). Every contrast ratio
+// in the palette is measured against it, so it is declared here rather than inherited: a
+// change to the library's default can no longer move the floor underneath the colours.
+// `colors.page` is that same value, now on purpose.
+const navigationTheme = {
+  ...DefaultTheme,
+  colors: {
+    ...DefaultTheme.colors,
+    background: colors.page,
+    card: colors.card,
+    primary: colors.brandStrong,
+    text: colors.textPrimary,
+    border: colors.divider,
+    notification: colors.danger,
+  },
+};
 
 // Configure notification behavior for Android
 Notifications.setNotificationHandler({
@@ -91,7 +111,7 @@ export default function App() {
         name: "Default",
         importance: Notifications.AndroidImportance.MAX,
         vibrationPattern: [0, 250, 250, 250],
-        lightColor: "#FF231F7C",
+        lightColor: colors.notificationLed,
       });
     };
 
@@ -174,10 +194,10 @@ export default function App() {
         header (Tabs.tsx builds headerStyle.height as HEADER_CONTENT_HEIGHT +
         insets.top, so the header extends up behind it). Dark icons on white.
 
-        Deliberately "dark" and not "auto": app.config.js sets
-        userInterfaceStyle: "automatic", but nothing in the app reads the colour
-        scheme, so "auto" would flip to light icons on a white header whenever the
-        user's phone is in dark mode. Revisit if real dark-mode support lands.
+        Deliberately "dark" and not "auto": nothing in the app reads the colour
+        scheme and every colour is a light-mode literal, so "auto" would flip to
+        light icons on a white header whenever the user's phone is in dark mode.
+        Revisit if real dark-mode support lands.
 
         `backgroundColor` and `translucent` are not options here — expo-status-bar
         warns and ignores both when edge-to-edge is on. To tint the area behind the
@@ -186,10 +206,11 @@ export default function App() {
       <StatusBar style="dark" />
       <NavigationContainer
         ref={navigationRef}
+        theme={navigationTheme}
         linking={linking}
         fallback={
           <View style={{ flex: 1, justifyContent: 'center', alignItems: 'center' }}>
-            <ActivityIndicator size="large" color="#007BFF" />
+            <ActivityIndicator size="large" color={colors.brand} />
           </View>
         }
         onReady={() => console.log("Navigation container ready")}
