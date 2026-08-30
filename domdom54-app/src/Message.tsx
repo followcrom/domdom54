@@ -135,7 +135,9 @@ export default function Message() {
         <Image source={imageSource} style={messageStyles.topImage} />
       </Pressable>
       <Card>
-        {title && <Text style={styles.title}>{title}</Text>}
+        {title && (
+          <Text style={[styles.title, styles.titleBlock]}>{title}</Text>
+        )}
         <Body onPress={showId}>{body}</Body>
 
         {audio && audio !== null && (

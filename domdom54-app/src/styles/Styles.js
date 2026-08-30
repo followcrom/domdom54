@@ -9,15 +9,23 @@ export default StyleSheet.create({
     alignItems: "center",
   },
 
+  // The type only. The 80%-wide indented column it used to carry lives in
+  // `titleBlock` below, because only one of the four screens with a title wants it -
+  // MeditationHistory had to undo `width` and `marginLeft` property by property, and
+  // Wisdom and Contact skipped this style altogether and redeclared the type instead.
   title: {
     fontSize: 28,
-    width: "80%",
     fontWeight: "bold",
     color: colors.brandStrong,
-    marginLeft: "10%",
     marginTop: 10,
     marginBottom: 0,
     textAlign: "center",
+  },
+
+  // The indented column a message title sits in. Compose it onto `title`.
+  titleBlock: {
+    width: "80%",
+    marginLeft: "10%",
   },
   image: {
     height: 200,
@@ -103,6 +111,50 @@ export default StyleSheet.create({
     color: colors.textInverse,
     marginLeft: 10,
     padding: 16,
+  },
+
+  // The shared text-input control. Contact, Discuss and Wisdom each had their own
+  // full copy of these five properties; the radius and padding stay local because
+  // the three fields are genuinely different sizes.
+  // Label on the left, control or value on the right. Settings and MeditationHistory
+  // between them had four verbatim copies of these three properties; padding and
+  // rules stay local, because each row sits in a different container.
+  row: {
+    flexDirection: "row",
+    alignItems: "center",
+    justifyContent: "space-between",
+  },
+
+  // Elevation. Two steps, matching the two that were hand-rolled in Contact and
+  // Discuss. `shadowColor` is always black - it darkens a surface, it is not a
+  // palette colour, which is why it is not a token choice.
+  shadowSm: {
+    shadowColor: colors.shadow,
+    shadowOffset: { width: 0, height: 1 },
+    shadowOpacity: 0.1,
+    shadowRadius: 2,
+    elevation: 2,
+  },
+  shadowMd: {
+    shadowColor: colors.shadow,
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.1,
+    shadowRadius: 3,
+    elevation: 3,
+  },
+
+  input: {
+    borderWidth: 1,
+    borderColor: colors.border,
+    borderRadius: 8,
+    backgroundColor: colors.card,
+    color: colors.textPrimary,
+    fontSize: 16,
+  },
+
+  // The invalid state for `input`. Colour only, so the field does not resize.
+  inputError: {
+    borderColor: colors.danger,
   },
 
   listContainer: {

@@ -97,7 +97,7 @@ export default function MeditationHistory({ visible, onClose }: Props) {
     >
       <View style={localStyles.overlay}>
         <View style={localStyles.sheet}>
-          <View style={localStyles.header}>
+          <View style={[styles.row, localStyles.header]}>
             <Text style={[styles.title, localStyles.modalTitle]}>Meditation History</Text>
             <View style={localStyles.headerButtons}>
               <TouchableOpacity onPress={exportLog} style={localStyles.closeButton}>
@@ -126,6 +126,7 @@ export default function MeditationHistory({ visible, onClose }: Props) {
                   <View
                     key={entry.timestamp}
                     style={[
+                      styles.row,
                       localStyles.row,
                       { backgroundColor: ROW_COLORS[index % 2] },
                     ]}
@@ -165,15 +166,11 @@ const localStyles = StyleSheet.create({
     paddingBottom: 10,
   },
   header: {
-    flexDirection: "row",
-    alignItems: "center",
-    justifyContent: "space-between",
     paddingRight: 20,
     paddingTop: 8,
   },
   modalTitle: {
     flex: 1,
-    width: undefined,
     marginLeft: 16,
     textAlign: "left",
   },
@@ -190,9 +187,6 @@ const localStyles = StyleSheet.create({
     paddingBottom: 10,
   },
   row: {
-    flexDirection: "row",
-    alignItems: "center",
-    justifyContent: "space-between",
     paddingVertical: 10,
     paddingHorizontal: 12,
     borderRadius: 8,

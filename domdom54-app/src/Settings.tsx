@@ -122,7 +122,7 @@ type RowProps = {
  */
 function Row({ label, value, onPress, busy, last }: RowProps) {
   const content = (
-    <View style={[settingsStyles.row, last && settingsStyles.rowLast]}>
+    <View style={[styles.row, settingsStyles.row, last && settingsStyles.rowLast]}>
       <Text style={settingsStyles.rowLabel}>{label}</Text>
       {busy ? (
         <ActivityIndicator size="small" color={colors.brand} />
@@ -341,7 +341,7 @@ export default function Settings() {
   return (
     <ScrollView contentContainerStyle={styles.container}>
       <Card style={settingsStyles.card}>
-        <View style={settingsStyles.switchRow}>
+        <View style={[styles.row, settingsStyles.switchRow]}>
           <Text style={settingsStyles.heading}>Notifications</Text>
           {busy ? (
             <View style={settingsStyles.switchControl}>
@@ -428,9 +428,6 @@ const settingsStyles = StyleSheet.create({
 
   // --- Notifications ---
   switchRow: {
-    flexDirection: "row",
-    alignItems: "center",
-    justifyContent: "space-between",
     minHeight: 44,
   },
   // Fixed width so the switch and the spinner that replaces it occupy the same
@@ -453,9 +450,6 @@ const settingsStyles = StyleSheet.create({
 
   // --- About rows ---
   row: {
-    flexDirection: "row",
-    alignItems: "center",
-    justifyContent: "space-between",
     minHeight: 52,
     paddingVertical: 12,
     borderBottomWidth: 1,

@@ -170,7 +170,7 @@ export default function Contact({ navigation }: ContactProps) {
           />
         </View>
         <View style={contactStyles.formContainer}>
-          <Text style={contactStyles.title}>Contact Us</Text>
+          <Text style={[styles.title, contactStyles.title]}>Contact Us</Text>
           <Text style={contactStyles.subtitle}>
             We'd love to hear from you. Send us a message and we'll respond as soon as possible.
           </Text>
@@ -196,7 +196,7 @@ export default function Contact({ navigation }: ContactProps) {
           <View style={contactStyles.inputContainer}>
             <Text style={contactStyles.label}>Name *</Text>
             <TextInput
-              style={[contactStyles.input, errors.name && contactStyles.inputError]}
+              style={[styles.input, contactStyles.input, errors.name && styles.inputError]}
               value={formData.name}
               onChangeText={(value) => handleInputChange('name', value)}
               placeholder="Enter your full name"
@@ -209,7 +209,7 @@ export default function Contact({ navigation }: ContactProps) {
           <View style={contactStyles.inputContainer}>
             <Text style={contactStyles.label}>Email *</Text>
             <TextInput
-              style={[contactStyles.input, errors.email && contactStyles.inputError]}
+              style={[styles.input, contactStyles.input, errors.email && styles.inputError]}
               value={formData.email}
               onChangeText={(value) => handleInputChange('email', value)}
               placeholder="Enter your email address"
@@ -224,7 +224,7 @@ export default function Contact({ navigation }: ContactProps) {
           <View style={contactStyles.inputContainer}>
             <Text style={contactStyles.label}>Subject *</Text>
             <TextInput
-              style={[contactStyles.input, errors.subject && contactStyles.inputError]}
+              style={[styles.input, contactStyles.input, errors.subject && styles.inputError]}
               value={formData.subject}
               onChangeText={(value) => handleInputChange('subject', value)}
               placeholder="What is this about?"
@@ -237,7 +237,12 @@ export default function Contact({ navigation }: ContactProps) {
           <View style={contactStyles.inputContainer}>
             <Text style={contactStyles.label}>Message *</Text>
             <TextInput
-              style={[contactStyles.textArea, errors.message && contactStyles.inputError]}
+              style={[
+                styles.input,
+                contactStyles.input,
+                contactStyles.textArea,
+                errors.message && styles.inputError,
+              ]}
               value={formData.message}
               onChangeText={(value) => handleInputChange('message', value)}
               placeholder="Enter your message here..."
@@ -253,6 +258,7 @@ export default function Contact({ navigation }: ContactProps) {
           <TouchableOpacity
             style={[
               contactStyles.submitButton,
+              styles.shadowMd,
               isLoading && styles.buttonContainerDisabled,
               isLoading && contactStyles.submitButtonDisabledOutline,
             ]}
@@ -292,12 +298,12 @@ const contactStyles = StyleSheet.create({
     marginBottom: 0,
     padding: 5,
   },
+  // Overrides `styles.title`: this screen's heading is ink rather than brand blue,
+  // and sits tight to the top of the form rather than 10px down.
   title: {
-    fontSize: 28,
-    fontWeight: 'bold',
     color: colors.textPrimary,
+    marginTop: 0,
     marginBottom: 5,
-    textAlign: 'center',
   },
   subtitle: {
     fontSize: 16,
@@ -315,27 +321,13 @@ const contactStyles = StyleSheet.create({
     color: colors.textPrimary,
     marginBottom: 8,
   },
+  // Composed onto `styles.input`. The textarea is that field plus a height - it used
+  // to be a second full copy of all seven properties.
   input: {
-    borderWidth: 1,
-    borderColor: colors.border,
-    borderRadius: 8,
     padding: 15,
-    fontSize: 16,
-    backgroundColor: colors.card,
-    color: colors.textPrimary,
   },
   textArea: {
-    borderWidth: 1,
-    borderColor: colors.border,
-    borderRadius: 8,
-    padding: 15,
-    fontSize: 16,
-    backgroundColor: colors.card,
-    color: colors.textPrimary,
     minHeight: 100,
-  },
-  inputError: {
-    borderColor: colors.danger,
   },
   errorText: {
     color: colors.danger,
@@ -348,14 +340,6 @@ const contactStyles = StyleSheet.create({
     padding: 16,
     alignItems: 'center',
     marginTop: 0,
-    shadowColor: colors.shadow,
-    shadowOffset: {
-      width: 0,
-      height: 2,
-    },
-    shadowOpacity: 0.1,
-    shadowRadius: 3,
-    elevation: 3,
   },
   // The disabled fill and border colour come from `buttonContainerDisabled` in the
   // central sheet - this used to be a hand-maintained copy of them. Only the width

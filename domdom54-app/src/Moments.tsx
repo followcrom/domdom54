@@ -153,7 +153,7 @@ useEffect(() => {
   return (
     <View style={StyleSheet.absoluteFill}>
       {/* Transport controls */}
-      <View style={speechPageStyles.transportButtonsRow}>
+      <View style={[styles.transportButtonsRow, speechPageStyles.transportButtonsRow]}>
         <Ionicons
           name="play-skip-back-circle-outline"
           size={48}
@@ -229,11 +229,8 @@ useEffect(() => {
 
 // Styles for SpeechPage component
 const speechPageStyles = StyleSheet.create({
+  // Composed onto `styles.transportButtonsRow`, which this used to restate in full.
   transportButtonsRow: {
-    flexDirection: "row",
-    flexWrap: "wrap",
-    justifyContent: "space-evenly",
-    alignItems: "center",
     padding: 10,
     backgroundColor: colors.page,
   },

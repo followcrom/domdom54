@@ -325,7 +325,7 @@ export default function Discuss() {
         <Card>
           <TextInput
             ref={textInputRef}
-            style={discussPageStyles.input}
+            style={[styles.input, styles.shadowSm, discussPageStyles.input]}
             accessibilityLabel="Input field for talking to followCrom"
             placeholder="Talk to followCrom..."
             value={userInput}
@@ -371,24 +371,11 @@ export default function Discuss() {
 
 // Enhanced styles for Discuss component
 const discussPageStyles = StyleSheet.create({
+  // Composed onto `styles.input`.
   input: {
     width: "100%",
-    borderColor: colors.border,
-    borderWidth: 1,
-    borderRadius: 8,
     padding: 12,
-    fontSize: 16,
-    color: colors.textPrimary,
-    backgroundColor: colors.card,
     minHeight: 44,
-    shadowColor: colors.shadow,
-    shadowOffset: {
-      width: 0,
-      height: 1,
-    },
-    shadowOpacity: 0.1,
-    shadowRadius: 2,
-    elevation: 2,
   },
   loadingContainer: {
     padding: 20,

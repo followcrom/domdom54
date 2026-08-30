@@ -229,7 +229,7 @@ export default function TextPage() {
       {searchOpen && (
         <TextInput
           ref={inputRef}
-          style={wisdomStyles.input}
+          style={[styles.input, wisdomStyles.input]}
           value={query}
           accessibilityLabel="Search input field"
           onChangeText={setQuery}
@@ -285,7 +285,7 @@ export default function TextPage() {
                 guard, "Please enter a search term." would appear under the
                 previous phrase's title. */}
             {!notice && phrase?.title && (
-              <Text style={wisdomStyles.title}>{phrase.title}</Text>
+              <Text style={styles.title}>{phrase.title}</Text>
             )}
             <Body onPress={showId}>{notice ?? phrase?.phrase ?? ""}</Body>
 
@@ -345,25 +345,15 @@ export default function TextPage() {
 }
 
 const wisdomStyles = StyleSheet.create({
-  title: {
-    fontSize: 28,
-    fontWeight: "bold",
-    color: colors.brandStrong,
-    marginTop: 10,
-    textAlign: "center",
-  },
+  // Composed onto `styles.input`. The 5px radius is this screen's own - every other
+  // field in the app uses the shared 8px, so this is drift worth a design decision.
   input: {
     width: "80%",
-    fontSize: 16,
-    borderColor: colors.border,
-    borderWidth: 1,
     borderRadius: 5,
     margin: 10,
     paddingTop: 12,
     paddingBottom: 12,
     paddingLeft: 12,
-    color: colors.textPrimary,
-    backgroundColor: colors.card,
   },
   resultsTopline: {
     fontSize: 24,
