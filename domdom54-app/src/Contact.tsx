@@ -13,6 +13,7 @@ import {
 import { Ionicons } from "@expo/vector-icons";
 import { StackNavigationProp } from "@react-navigation/stack";
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
+import styles from './styles/Styles';
 import colors from './styles/colors';
 
 // Define types for form data and errors
@@ -250,13 +251,17 @@ export default function Contact({ navigation }: ContactProps) {
 
           {/* Submit Button */}
           <TouchableOpacity
-            style={[contactStyles.submitButton, isLoading && contactStyles.submitButtonDisabled]}
+            style={[
+              contactStyles.submitButton,
+              isLoading && styles.buttonContainerDisabled,
+              isLoading && contactStyles.submitButtonDisabledOutline,
+            ]}
             onPress={handleSubmit}
             disabled={isLoading}
           >
             <Text style={[
               contactStyles.submitButtonText,
-              isLoading && contactStyles.submitButtonTextDisabled,
+              isLoading && styles.buttonTextDisabled,
             ]}>
               {isLoading ? 'Sending...' : 'Send Message'}
             </Text>
@@ -352,20 +357,16 @@ const contactStyles = StyleSheet.create({
     shadowRadius: 3,
     elevation: 3,
   },
-  // Matches the primary button's disabled treatment: a white fill with a border outline
-  // rather than a grey slab, so the label stays legible at 3.57:1.
-  submitButtonDisabled: {
-    backgroundColor: colors.card,
+  // The disabled fill and border colour come from `buttonContainerDisabled` in the
+  // central sheet - this used to be a hand-maintained copy of them. Only the width
+  // is local, because unlike the central button this one has no border at rest.
+  submitButtonDisabledOutline: {
     borderWidth: 1,
-    borderColor: colors.border,
   },
   submitButtonText: {
     color: colors.textInverse,
     fontSize: 18,
     fontWeight: '600',
-  },
-  submitButtonTextDisabled: {
-    color: colors.textDisabled,
   },
   successBanner: {
     backgroundColor: colors.successSurface,
