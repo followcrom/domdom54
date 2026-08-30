@@ -139,7 +139,7 @@ export default function Message() {
         <Body onPress={showId}>{body}</Body>
 
         {audio && audio !== null && (
-          <View style={messageStyles.audioContainer}>
+          <View style={styles.audioContainer}>
             {isLoadingPlayback ? (
               <ActivityIndicator size="large" color={colors.brand} />
             ) : (
@@ -151,7 +151,7 @@ export default function Message() {
               />
             )}
             {audioError && (
-              <Text style={messageStyles.audioError}>{audioError}</Text>
+              <Text style={styles.audioError}>{audioError}</Text>
             )}
           </View>
         )}
@@ -211,66 +211,9 @@ const messageStyles = StyleSheet.create({
     left: "50%",
     marginLeft: -20, // Half the icon size to center it
   },
-  audioContainer: {
-    alignItems: "center",
-    marginTop: 10,
-    marginBottom: 10,
-    width: "60%",
-    alignSelf: "center",
-    borderTopWidth: 2,
-    borderBottomWidth: 2,
-    borderStyle: "dashed",
-    borderColor: colors.brand,
-    padding: 5,
-  },
-  audioError: {
-    color: colors.danger,
-    fontSize: 14,
-    textAlign: "center",
-    marginTop: 8,
-  },
   topImage: {
     width: "100%",
     height: 200,
     resizeMode: "cover",
   },
-  // button: {
-  //   width: "85%",
-  //   alignSelf: "center",
-  //   backgroundColor: "#007BFF",
-  //   paddingVertical: 16,
-  //   paddingHorizontal: 20,
-  //   borderRadius: 16,
-  //   alignItems: "center",
-  //   marginVertical: 15,
-  //   shadowColor: "#007BFF",
-  //   shadowOffset: {
-  //     width: 0,
-  //     height: 6,
-  //   },
-  //   shadowOpacity: 0.4,
-  //   shadowRadius: 12,
-  //   elevation: 10,
-  //   transform: [{ scale: 1 }],
-  // },
-  // buttonContent: {
-  //   flexDirection: "row",
-  //   alignItems: "center",
-  //   justifyContent: "center",
-  //   minHeight: 24,
-  // },
-  // buttonIcon: {
-  //   marginRight: 12,
-  // },
-  // buttonArrow: {
-  //   marginLeft: 8,
-  //   opacity: 0.8,
-  // },
-  // buttonText: {
-  //   color: "white",
-  //   fontSize: 18,
-  //   fontWeight: "700",
-  //   letterSpacing: 1,
-  //   textTransform: "uppercase",
-  // },
 });

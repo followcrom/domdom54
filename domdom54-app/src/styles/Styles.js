@@ -9,11 +9,6 @@ export default StyleSheet.create({
     alignItems: "center",
   },
 
-  content: {
-    flex: 1,
-    alignItems: "center",
-  },
-
   title: {
     fontSize: 28,
     width: "80%",
@@ -35,10 +30,6 @@ export default StyleSheet.create({
     width: "100%",
     height: 250,
     resizeMode: "cover",
-  },
-  text: {
-    fontSize: 20,
-    textAlign: "center",
   },
 
   textContainer: {
@@ -114,15 +105,6 @@ export default StyleSheet.create({
     padding: 16,
   },
 
-  divider: {
-    borderBottomColor: colors.brand,
-    borderBottomWidth: 2,
-    marginLeft: "8%",
-    width: "84%",
-    marginTop: 10,
-    marginBottom: 10,
-  },
-
   listContainer: {
     paddingHorizontal: 0,
     paddingBottom: 20,
@@ -141,15 +123,25 @@ export default StyleSheet.create({
   },
 
   audioContainer: {
-  alignItems: "center",
-  marginTop: 10,
-  marginBottom: 10,
-  width: "60%",
-  alignSelf: "center",
-  borderTopWidth: 2,
-  borderBottomWidth: 2,
-  borderStyle: "dashed",
-  borderColor: colors.brand,
-  padding: 5,
-},
+    alignItems: "center",
+    marginTop: 10,
+    marginBottom: 10,
+    width: "60%",
+    alignSelf: "center",
+    borderTopWidth: 2,
+    borderBottomWidth: 2,
+    borderStyle: "dashed",
+    borderColor: colors.brand,
+    padding: 5,
+  },
+
+  // The error line for the shared `useAudioPlayback` hook. Lives next to the
+  // container it renders inside, so every screen with audio reports failure the
+  // same way - Wisdom and Message had drifted into two identical copies of this.
+  audioError: {
+    color: colors.danger,
+    fontSize: 14,
+    textAlign: "center",
+    marginTop: 8,
+  },
 });

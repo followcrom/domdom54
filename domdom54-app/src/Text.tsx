@@ -302,7 +302,7 @@ export default function TextPage() {
                   />
                 )}
                 {audioError && (
-                  <Text style={wisdomStyles.audioError}>{audioError}</Text>
+                  <Text style={styles.audioError}>{audioError}</Text>
                 )}
               </View>
             )}
@@ -351,12 +351,6 @@ const wisdomStyles = StyleSheet.create({
     color: colors.brandStrong,
     marginTop: 10,
     textAlign: "center",
-  },
-  audioError: {
-    color: colors.danger,
-    fontSize: 14,
-    textAlign: "center",
-    marginTop: 8,
   },
   input: {
     width: "80%",
