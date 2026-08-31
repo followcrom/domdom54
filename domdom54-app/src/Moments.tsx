@@ -11,7 +11,6 @@ import { useAudioPlayer, useAudioPlayerStatus, setAudioModeAsync } from "expo-au
 import styles from "./styles/Styles";
 import colors from "./styles/colors";
 import { useNavigation } from "@react-navigation/native";
-import { StackNavigationProp } from "@react-navigation/stack";
 
 // --- Type Definitions ---
 
@@ -20,16 +19,13 @@ type AudioFile = {
   url: string;
 };
 
-type RootStackParamList = {
-  Moments: undefined;
-};
-
-type MomentsNavigationProp = StackNavigationProp<RootStackParamList, "Moments">;
-
 // --- Component ---
 
 export default function Moments() {
-  const navigation = useNavigation<MomentsNavigationProp>();
+  // Untyped on purpose: this screen never navigates anywhere. The only thing it
+  // wants from navigation is the "blur" event, to stop playback on the way out,
+  // so there are no routes for a param list to describe.
+  const navigation = useNavigation();
   const [audioFiles, setAudioFiles] = useState<AudioFile[]>([]);
   const [currentIndex, setCurrentIndex] = useState<number | null>(null);
 
@@ -157,24 +153,24 @@ useEffect(() => {
         <Ionicons
           name="play-skip-back-circle-outline"
           size={48}
-          color={colors.textSecondary}
+          color={colors.brand}
           onPress={playPrevious}
           disabled={currentIndex === null}
         />
         <Ionicons
           name="reload-circle-outline"
           size={48}
-          color={colors.textSecondary}
+          color={colors.brand}
           onPress={() => repeatCurrent()}
           disabled={currentIndex === null}
         />
         <Ionicons
-          // Larger than its neighbours, and the only transport control that carries colour:
-          // size marks the primary action, colour is reserved for state. The rest of the row
-          // is textSecondary because skipping and stopping are secondary to playing - five
-          // identical blue icons read as a wall rather than a control.
+          // The row is one blue: every control is brand, always, so the bar reads as a
+          // single instrument rather than as a set of separately-styled buttons. Size is
+          // what ranks the primary action, and colour stays reserved for state - this is
+          // the only icon that turns orange, and only while something is playing.
           name={isPlaying ? "pause-circle-outline" : "play-circle-outline"}
-          size={56}
+          size={48}
           color={isPlaying ? colors.accentStrong : colors.brand}
           onPress={() => playAudio(currentIndex ?? 0)}
           disabled={audioFiles.length === 0}
@@ -182,46 +178,62 @@ useEffect(() => {
         <Ionicons
           name="stop-circle-outline"
           size={48}
-          color={colors.textSecondary}
+          color={colors.brand}
           onPress={stopSound}
           disabled={currentIndex === null}
         />
         <Ionicons
           name="play-skip-forward-circle-outline"
           size={48}
-          color={colors.textSecondary}
+          color={colors.brand}
           onPress={playNext}
           disabled={currentIndex === null}
         />
       </View>
 
+      {/* The list gives blue up entirely so the transport row can have it back. A track
+          name is content, not a link, so it is ink; the row that is playing is state, so
+          it is orange. Neither colour is doing two jobs.
+          The alt/card banding stays. It is only 1.30:1, which did nothing while the labels
+          were dark blue and fighting it for attention - against ink on white it is enough
+          to walk the eye down the list, which is all it is being asked to do. */}
       <ScrollView contentContainerStyle={styles.listContainer}>
-        {audioFiles.map((item, index) => (
-          <TouchableOpacity
-            key={index.toString()}
-            style={[
-              styles.listItem,
-              {
-                backgroundColor:
-                  index === currentIndex
-                    ? colors.brandStrong
+        {audioFiles.map((item, index) => {
+          const isCurrent = index === currentIndex;
+          return (
+            <TouchableOpacity
+              key={index.toString()}
+              style={[
+                styles.listItem,
+                {
+                  backgroundColor: isCurrent
+                    ? colors.accentStrong
                     : index % 2 === 0
                     ? colors.alt
                     : colors.card,
-              },
-            ]}
-            onPress={() => playAudio(index)}
-          >
-            <Text
-              style={[
-                styles.listItemText,
-                { color: index === currentIndex ? colors.textInverse : colors.brandDeep },
+                },
               ]}
+              onPress={() => playAudio(index)}
             >
-              {item.name}
-            </Text>
-          </TouchableOpacity>
-        ))}
+              {isCurrent && (
+                <View style={speechPageStyles.nowPlayingMark}>
+                  <Ionicons name="stats-chart" size={16} color={colors.textInverse} />
+                </View>
+              )}
+              <Text
+                style={[
+                  styles.listItemText,
+                  {
+                    color: isCurrent ? colors.textInverse : colors.textPrimary,
+                    fontWeight: isCurrent ? "600" : "400",
+                  },
+                ]}
+              >
+                {item.name}
+              </Text>
+            </TouchableOpacity>
+          );
+        })}
       </ScrollView>
     </View>
   );
@@ -231,6 +243,19 @@ useEffect(() => {
 const speechPageStyles = StyleSheet.create({
   transportButtonsRow: {
     padding: 10,
-    backgroundColor: colors.page,
+    backgroundColor: colors.brandSurface,
+  },
+
+  // Absolutely positioned so the track name stays optically centred in the row - a marker
+  // in the flow would shove every playing title off-centre as it appears and disappears.
+  // Stretched top-to-bottom and centred with flex rather than offset from a 50% top: the
+  // icon renders as Text, whose line box is taller than its size, so a half-size negative
+  // margin under-corrects and leaves the glyph sitting high.
+  nowPlayingMark: {
+    position: "absolute",
+    left: 22,
+    top: 0,
+    bottom: 0,
+    justifyContent: "center",
   },
 });

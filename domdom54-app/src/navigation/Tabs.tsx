@@ -324,7 +324,7 @@ const styles = StyleSheet.create({
   tabBarContainer: {
     flexDirection: 'row',
     borderTopWidth: 2,
-    borderTopColor: colors.divider,
+    borderTopColor: colors.brand,
     paddingTop: 5,
     paddingHorizontal: 2,
     backgroundColor: colors.card,

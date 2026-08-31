@@ -8,47 +8,26 @@ import {
   ImageBackground,
 } from "react-native";
 import { useAudioPlayer, useAudioPlayerStatus, setAudioModeAsync } from "expo-audio";
-import AsyncStorage from "@react-native-async-storage/async-storage";
+import { recordCompletion } from "./meditationLog";
 import styles from "./styles/Styles";
 import colors from "./styles/colors";
 import { Banner, useIsLandscape } from "./components/Layout";
 import { Ionicons, MaterialCommunityIcons } from "@expo/vector-icons";
 import { RouteProp, useRoute, useNavigation } from "@react-navigation/native";
 import { StackNavigationProp } from "@react-navigation/stack";
+import type { RootStackParamList } from "../App";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 
 // --- Type Definitions ---
 
-type MeditationLogEntry = {
-  timestamp: string;
-  title: string;
-};
-
-// Define the expected route params for this screen
-type RootStackParamList = {
-  MeditationPlayer: { audioUrl: string; title: string };
-  // Add other screens here if needed
-};
-
-// Define the prop types for the navigation and route
+// Route params come from the stack's own param list in App.tsx rather than a
+// local restatement of it, so a change to what MeditationPlayer is handed is a
+// type error here instead of a silent disagreement.
 type MeditationPlayerRouteProp = RouteProp<
   RootStackParamList,
   "MeditationPlayer"
 >;
 type MeditationPlayerNavigationProp = StackNavigationProp<RootStackParamList>;
-
-// --- Helper Functions ---
-
-const logMeditationComplete = async (title: string) => {
-  try {
-    const raw = await AsyncStorage.getItem("meditationLog");
-    const log: MeditationLogEntry[] = raw ? JSON.parse(raw) : [];
-    log.push({ timestamp: new Date().toISOString(), title });
-    await AsyncStorage.setItem("meditationLog", JSON.stringify(log));
-  } catch (error) {
-    console.error("Error logging meditation completion:", error);
-  }
-};
 
 // --- Component ---
 
@@ -105,10 +84,12 @@ export default function MeditationPlayer() {
     }
   }, [player, isLoaded]);
 
-  // Log meditation only when playback completes naturally
+  // Log meditation only when playback completes naturally. `duration` is the
+  // track length the player reported for this sit - recorded so the Settings
+  // card can total real minutes rather than guessing from track titles.
   useEffect(() => {
     if (status?.didJustFinish) {
-      logMeditationComplete(title);
+      recordCompletion(title, duration);
     }
   }, [status?.didJustFinish]);
 

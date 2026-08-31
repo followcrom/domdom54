@@ -20,8 +20,7 @@
 export const colors = {
   // --- Blue: the app itself. Identity, navigation, any control at rest. Never state.
   brand: "#1386FD", // 3.59 / 3.20 - transport icons, progress fill, dashed + section rules
-  brandStrong: "#006AD0", // 5.29 / 4.72 - headings, links, primary button, now-playing row
-  brandDeep: "#00468D", // 9.29 / 8.30 - list labels; the only blue that survives `alt`
+  brandStrong: "#006AD0", // 5.29 / 4.72 - headings, links, primary button
   brandSurface: "#EEF5FF", // tint - informational panels
 
   // --- Orange: "right now". The tab you are on, the thing that is playing.
@@ -47,7 +46,7 @@ export const colors = {
 
   // --- Lines
   border: "#85888C", // 3.56 / 3.18 - input outlines. Identifies the control, so needs 3:1.
-  divider: "#D7D9DC", // decorative rules, and the assistant chat bubble
+  divider: "#D7D9DC", // row rules, the switch's off track, the assistant chat bubble
 
   // --- Surfaces
   card: "#FFFFFF",
@@ -64,12 +63,6 @@ export const colors = {
   scrimOverlay: "rgba(0,0,0,0.5)", // modal dim
   scrimPanel: "rgba(255,255,255,0.8)", // player transport panel over the tiled background
   scrimStatusBar: "rgba(255,255,255,0.5)", // player status bar strip
-
-  // --- Deferred: MeditationHistory is moving into Settings and will be redesigned there.
-  // These two stripes are only 1.06:1 apart, which is close to no stripe at all without
-  // colour. Left as-is deliberately; fix as part of the move, not before.
-  historyRowA: "#e8f4fd",
-  historyRowB: "#fff9e6",
 } as const;
 
 export default colors;

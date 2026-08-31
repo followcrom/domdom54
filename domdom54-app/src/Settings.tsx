@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useCallback } from "react";
 import {
   View,
   Text,
@@ -21,15 +21,24 @@ import * as Device from "expo-device";
 import styles from "./styles/Styles";
 import colors from "./styles/colors";
 import { Card } from "./components/Layout";
-import { useNavigation } from "@react-navigation/native";
+import { useNavigation, useFocusEffect } from "@react-navigation/native";
 import { StackNavigationProp } from "@react-navigation/stack";
+import type { RootStackParamList } from "../App";
+import MeditationHistory from "./MeditationHistory";
+import {
+  EMPTY_TOTALS,
+  formatMinutes,
+  loadLog,
+  totalsFrom,
+} from "./meditationLog";
 
-// This screen holds two things and deliberately nothing else: the one preference
-// the app actually has (notifications), and the facts you'd need to support it
-// (version, contact, privacy). It used to be the overflow drawer for anything
-// that didn't fit elsewhere - a Home link, a "Useful Links" heading, the message
-// viewer. The rule now is: something you configure goes in the first card,
-// something about the app goes in the second, and anything else isn't a setting.
+// This screen holds three things and deliberately nothing else: the one preference
+// the app actually has (notifications), your own past activity (meditation history),
+// and the facts you'd need to support the app (version, contact, privacy). It used
+// to be the overflow drawer for anything that didn't fit elsewhere - a Home link, a
+// "Useful Links" heading, the message viewer. The rule now is: something you
+// configure goes in the first card, something you did goes in the next, something
+// about the app goes after that, and anything else isn't a setting.
 
 // The OS-level permission (can only be granted/revoked by the user, via the
 // native prompt once or via system settings after that) and the app's own
@@ -43,16 +52,11 @@ import { StackNavigationProp } from "@react-navigation/stack";
 // is our implementation detail, not a mental model to hand the user.
 type OsPermissionStatus = "granted" | "denied" | "undetermined" | "checking";
 
-type RootStackParamList = {
-  Settings: undefined;
-  Message: undefined;
-  Contact: undefined;
-};
-
-type SettingsNavigationProp = StackNavigationProp<
-  RootStackParamList,
-  "Settings"
->;
+// The real stack, imported rather than re-declared. The local copy this replaces
+// listed `Settings` and `Message`, and neither is a stack route: Settings and
+// Messages are both tabs inside HomeTabs, so a navigate("Message") would have
+// found nothing. Type-only, so it adds no runtime cycle with App.tsx.
+type SettingsNavigationProp = StackNavigationProp<RootStackParamList>;
 
 const SUBSCRIBED_KEY = "pushSubscribed";
 
@@ -112,6 +116,8 @@ type RowProps = {
   busy?: boolean;
   /** Suppresses the divider on the final row of a card. */
   last?: boolean;
+  /** Leaves the app (a browser tab) rather than navigating within it - swaps the chevron for an "opens elsewhere" mark. */
+  external?: boolean;
 };
 
 /**
@@ -120,7 +126,7 @@ type RowProps = {
  * to a website is not the same kind of thing as "Generate Wisdom", and it
  * shouldn't carry the same visual weight.
  */
-function Row({ label, value, onPress, busy, last }: RowProps) {
+function Row({ label, value, onPress, busy, last, external }: RowProps) {
   const content = (
     <View style={[styles.row, settingsStyles.row, last && settingsStyles.rowLast]}>
       <Text style={settingsStyles.rowLabel}>{label}</Text>
@@ -128,6 +134,8 @@ function Row({ label, value, onPress, busy, last }: RowProps) {
         <ActivityIndicator size="small" color={colors.brand} />
       ) : value ? (
         <Text style={settingsStyles.rowValue}>{value}</Text>
+      ) : external ? (
+        <Ionicons name="open-outline" size={20} color={colors.textSecondary} />
       ) : onPress ? (
         <Ionicons name="chevron-forward" size={20} color={colors.textSecondary} />
       ) : null}
@@ -159,6 +167,21 @@ export default function Settings() {
   // flight, so a double tap can't fire two conflicting requests.
   const [busy, setBusy] = useState(false);
   const [checkingUpdate, setCheckingUpdate] = useState(false);
+  const [showHistory, setShowHistory] = useState(false);
+  const [totals, setTotals] = useState(EMPTY_TOTALS);
+
+  const refreshTotals = useCallback(async () => {
+    setTotals(totalsFrom(await loadLog()));
+  }, []);
+
+  // The log is written by the player, on another screen entirely, so recompute
+  // whenever this tab comes into view rather than only on mount. Deletions from
+  // the history sheet are caught by its onClose below.
+  useFocusEffect(
+    useCallback(() => {
+      refreshTotals();
+    }, [refreshTotals])
+  );
 
   const refreshOsPermission = async () => {
     try {
@@ -287,14 +310,14 @@ export default function Settings() {
     }
   };
 
-  // One line, one meaning. This four-way branch replaces the old stack of
-  // conditional paragraphs, which could contradict each other - and which told
-  // brand new users their notifications were "blocked" before they had ever
-  // been asked.
+
+  // Null when subscribed: the link below replaces the sentence rather than
+  // sitting under it, because "you'll get new wisdom" and "here's the wisdom
+  // you got" are the same thought and the link is the one you can act on.
   const statusLine = (() => {
     if (osPermission === "checking") return "Checking...";
     if (isPermissionBlocked) return "Notifications are blocked in your device settings.";
-    if (switchOn) return "You'll get new wisdom as it lands.";
+    if (switchOn) return null;
     return "Turn on to receive messages.";
   })();
 
@@ -341,6 +364,31 @@ export default function Settings() {
   return (
     <ScrollView contentContainerStyle={styles.container}>
       <Card style={settingsStyles.card}>
+        <Text style={[settingsStyles.heading, settingsStyles.cardHeading]}>
+          Account
+        </Text>
+
+        <Row label="Meditation history" onPress={() => setShowHistory(true)} />
+        <Row label="This month" value={formatMinutes(totals.thisMonth)} />
+        <Row label="Last month" value={formatMinutes(totals.lastMonth)} />
+        <Row label="All time" value={formatMinutes(totals.allTime)} last />
+
+        <Text style={settingsStyles.statusLine}>
+          Your meditation history is stored only on this device. It is never sent to
+          the server or shared with anyone.
+        </Text>
+      </Card>
+
+      <MeditationHistory
+        visible={showHistory}
+        onClose={() => {
+          setShowHistory(false);
+          refreshTotals();
+        }}
+      />
+
+
+      <Card style={settingsStyles.card}>
         <View style={[styles.row, settingsStyles.switchRow]}>
           <Text style={settingsStyles.heading}>Notifications</Text>
           {busy ? (
@@ -364,17 +412,45 @@ export default function Settings() {
           )}
         </View>
 
-        <Text style={settingsStyles.statusLine}>{statusLine}</Text>
+        {statusLine && (
+          <Text style={settingsStyles.statusLine}>{statusLine}</Text>
+        )}
+
+        {switchOn && (
+          <Text
+            style={settingsStyles.link}
+            onPress={() =>
+              navigation.navigate("HomeTabs", { screen: "Messages" })
+            }
+            accessibilityRole="link"
+          >
+            See your latest message
+          </Text>
+        )}
 
         {isPermissionBlocked && (
           <Text
-            style={settingsStyles.link}
+            style={[settingsStyles.link, settingsStyles.linkAfterText]}
             onPress={() => Linking.openSettings()}
             accessibilityRole="link"
           >
             Open notification settings
           </Text>
         )}
+      </Card>
+
+            <Card style={settingsStyles.card}>
+        <Text style={[settingsStyles.heading, settingsStyles.cardHeading]}>
+          Contact
+        </Text>
+
+        <Row label="Get in touch" onPress={() => navigation.navigate("Contact")} />
+        <Row
+          label="followCrom online"
+          onPress={() => Linking.openURL(FOLLOWCROM_URL)}
+          external
+          last
+        />
       </Card>
 
       <Card style={settingsStyles.card}>
@@ -391,19 +467,7 @@ export default function Settings() {
         <Row
           label="Privacy & data"
           onPress={() => Linking.openURL(PRIVACY_URL)}
-          last
-        />
-      </Card>
-
-            <Card style={settingsStyles.card}>
-        <Text style={[settingsStyles.heading, settingsStyles.cardHeading]}>
-          More
-        </Text>
-
-        <Row label="Contact us" onPress={() => navigation.navigate("Contact")} />
-        <Row
-          label="followCrom"
-          onPress={() => Linking.openURL(FOLLOWCROM_URL)}
+          external
           last
         />
       </Card>
@@ -436,6 +500,9 @@ const settingsStyles = StyleSheet.create({
     width: 52,
     alignItems: "flex-end",
   },
+  // Subscribed shows a link where every other state shows a sentence, so these
+  // two must occupy identical vertical space - matching size and top margin -
+  // or the card grows and shrinks as the switch is toggled.
   statusLine: {
     fontSize: 16,
     color: colors.textSecondary,
@@ -445,6 +512,11 @@ const settingsStyles = StyleSheet.create({
     fontSize: 16,
     color: colors.brandStrong,
     textDecorationLine: "underline",
+    marginTop: 4,
+  },
+  // The blocked state is the one case where a link sits BELOW a sentence rather
+  // than instead of one, and there it needs the breathing room back.
+  linkAfterText: {
     marginTop: 10,
   },
 

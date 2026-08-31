@@ -9,64 +9,52 @@ import {
   Share,
 } from "react-native";
 import { Ionicons } from "@expo/vector-icons";
-import AsyncStorage from "@react-native-async-storage/async-storage";
 import styles from "./styles/Styles";
 import colors from "./styles/colors";
 import { Body } from "./components/Layout";
-
-type MeditationLogEntry = {
-  timestamp: string;
-  title: string;
-};
+import {
+  MeditationLogEntry,
+  entryMinutes,
+  loadLog,
+  saveLog,
+} from "./meditationLog";
 
 type Props = {
   visible: boolean;
+  /** Called on dismiss - Settings re-reads the log so its totals stay in step with any deletions. */
   onClose: () => void;
 };
 
-// Deferred: this sheet is moving into Settings and will be redesigned there. These two
-// stripes are only 1.06:1 apart, which is close to no stripe at all without colour -
-// left alone on purpose, to be fixed as part of the move rather than twice.
-const ROW_COLORS = [colors.historyRowA, colors.historyRowB];
+// Row banding matches the rest of the app's lists (alt/card, 1.30:1).
+const ROW_COLORS = [colors.alt, colors.card];
 
 export default function MeditationHistory({ visible, onClose }: Props) {
   const [meditationLog, setMeditationLog] = useState<MeditationLogEntry[]>([]);
 
-  const loadLog = async () => {
-    try {
-      const raw = await AsyncStorage.getItem("meditationLog");
-      if (raw) {
-        const log: MeditationLogEntry[] = JSON.parse(raw);
-        setMeditationLog(log.slice(-20).reverse());
-      } else {
-        setMeditationLog([]);
-      }
-    } catch (error) {
-      console.error("Error loading meditation log:", error);
-    }
+  const refresh = async () => {
+    setMeditationLog((await loadLog()).slice(-20).reverse());
   };
 
   useEffect(() => {
     if (!visible) return;
-    loadLog();
+    refresh();
   }, [visible]);
 
   const exportLog = async () => {
     try {
-      const raw = await AsyncStorage.getItem("meditationLog");
-      const log: MeditationLogEntry[] = raw ? JSON.parse(raw) : [];
+      const log = await loadLog();
       if (log.length === 0) {
         Share.share({ message: "No meditation history to export." });
         return;
       }
       const csv = [
-        "Date,Time,Title",
+        "Date,Time,Title,Minutes",
         ...log.map((e) => {
           const d = new Date(e.timestamp);
           const date = d.toLocaleDateString("en-GB");
           const time = d.toLocaleTimeString("en-GB", { hour: "2-digit", minute: "2-digit", hour12: false });
           const title = `"${e.title.replace(/"/g, '""')}"`;
-          return `${date},${time},${title}`;
+          return `${date},${time},${title},${entryMinutes(e)}`;
         }),
       ].join("\n");
       await Share.share({ message: csv, title: "Meditation History" });
@@ -76,16 +64,9 @@ export default function MeditationHistory({ visible, onClose }: Props) {
   };
 
   const deleteEntry = async (timestamp: string) => {
-    try {
-      const raw = await AsyncStorage.getItem("meditationLog");
-      if (!raw) return;
-      const log: MeditationLogEntry[] = JSON.parse(raw);
-      const updated = log.filter((e) => e.timestamp !== timestamp);
-      await AsyncStorage.setItem("meditationLog", JSON.stringify(updated));
-      setMeditationLog(updated.slice(-20).reverse());
-    } catch (error) {
-      console.error("Error deleting meditation log entry:", error);
-    }
+    const updated = (await loadLog()).filter((e) => e.timestamp !== timestamp);
+    await saveLog(updated);
+    setMeditationLog(updated.slice(-20).reverse());
   };
 
   return (
@@ -162,6 +143,7 @@ const localStyles = StyleSheet.create({
     backgroundColor: colors.card,
     borderTopLeftRadius: 20,
     borderTopRightRadius: 20,
+    minHeight: "80%",
     maxHeight: "80%",
     paddingBottom: 10,
   },

@@ -12,6 +12,7 @@ import {
 } from 'react-native';
 import { Ionicons } from "@expo/vector-icons";
 import { StackNavigationProp } from "@react-navigation/stack";
+import type { RootStackParamList } from "../App";
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import styles from './styles/Styles';
 import colors from './styles/colors';
@@ -32,12 +33,9 @@ interface FormErrors {
   message?: string;
 }
 
-// Define navigation prop type
-type RootStackParamList = {
-  Home: undefined;
-  Contact: undefined;
-};
-
+// The stack's own param list, not a local copy. Contact is a genuine stack
+// route, so this one keeps its second argument - the `Home` the local copy also
+// declared was never a stack route, and nothing here navigated to it.
 type ContactScreenNavigationProp = StackNavigationProp<
   RootStackParamList,
   'Contact'
@@ -228,7 +226,7 @@ export default function Contact({ navigation }: ContactProps) {
               style={[styles.input, contactStyles.input, errors.subject && styles.inputError]}
               value={formData.subject}
               onChangeText={(value) => handleInputChange('subject', value)}
-              placeholder="Hello World"
+              placeholder="Hello Dolly"
               placeholderTextColor={colors.textSecondary}
             />
             {errors.subject && <Text style={contactStyles.errorText}>{errors.subject}</Text>}

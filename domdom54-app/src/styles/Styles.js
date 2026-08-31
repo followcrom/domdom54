@@ -1,6 +1,32 @@
 import { StyleSheet } from "react-native";
 import colors from "./colors";
 
+/**
+ * List row geometry, exported because Meditations' FlatList has to declare the row height
+ * up front in getItemLayout. Deriving the style and that constant from the same numbers is
+ * what stops them drifting: they used to disagree by three pixels, which is invisible on one
+ * row and compounds into misplaced scroll offsets down a long list.
+ *
+ * lineHeight is set explicitly for the same reason - without it the row height depends on
+ * the platform's default leading for a 20pt font, which is not a number this file can know.
+ * The tradeoff is that lineHeight does not follow the OS font-scale setting the way fontSize
+ * does, so a very large accessibility scale will crowd the row before it clips it.
+ */
+export const LIST_ITEM_VERTICAL_PADDING = 18;
+export const LIST_ITEM_LINE_HEIGHT = 26;
+export const LIST_ITEM_BORDER_WIDTH = 1;
+export const LIST_ITEM_HEIGHT =
+  LIST_ITEM_VERTICAL_PADDING * 2 + LIST_ITEM_LINE_HEIGHT + LIST_ITEM_BORDER_WIDTH; // 63
+
+/**
+ * Shared height for the app's two control bars - Moments' transport row and Meditations'
+ * tab bar - so they read as one piece of chrome rather than two bars that happen to be
+ * close. Derived from the transport row's own geometry (48pt icons, 10pt padding top and
+ * bottom) since that one was fixed first; the tab bar centers its content into this height
+ * instead of arriving at a near-match by coincidence.
+ */
+export const TOP_BAR_HEIGHT = 68; // 10 padding + 48 icon + 10 padding
+
 export default StyleSheet.create({
   container: {
     flexGrow: 1,
@@ -65,6 +91,7 @@ export default StyleSheet.create({
     flexWrap: "wrap",
     justifyContent: "space-evenly", // or 'space-around'
     alignItems: "center",
+    minHeight: TOP_BAR_HEIGHT,
   },
 
   transportButtonsStyle: {
@@ -147,15 +174,16 @@ export default StyleSheet.create({
   },
 
   listItem: {
-    paddingVertical: 18,
-    borderBottomWidth: 1,
-    borderBottomColor: colors.divider,
+    paddingVertical: LIST_ITEM_VERTICAL_PADDING,
+    borderBottomWidth: LIST_ITEM_BORDER_WIDTH,
+    borderBottomColor: colors.brandSurface,
   },
 
   listItemText: {
     textAlign: "center",
-    color: colors.brandDeep,
+    color: colors.textPrimary,
     fontSize: 20,
+    lineHeight: LIST_ITEM_LINE_HEIGHT,
   },
 
   audioContainer: {
