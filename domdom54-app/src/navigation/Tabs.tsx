@@ -181,7 +181,7 @@ export default function BottomTabs() {
               <MaterialCommunityIcons
                 name="face-man-shimmer"
                 size={34}
-                color={colors.accent}
+                color={colors.brandStrong}
                 style={{ marginTop: 5 }}
               />
             </View>
@@ -203,7 +203,7 @@ export default function BottomTabs() {
               <MaterialCommunityIcons 
                 name="meteor" 
                 size={40} 
-                color={colors.accent} 
+                color={colors.brandStrong} 
               />
             </View>
           ),
@@ -224,7 +224,7 @@ export default function BottomTabs() {
               <MaterialCommunityIcons
                 name="meditation"
                 size={40}
-                color={colors.accent}
+                color={colors.brandStrong}
               />
             </View>
           ),
@@ -245,7 +245,7 @@ export default function BottomTabs() {
               <MaterialCommunityIcons
                 name="weather-partly-cloudy"
                 size={40}
-                color={colors.accent}
+                color={colors.brandStrong}
               />
             </View>
           ),
@@ -266,7 +266,7 @@ export default function BottomTabs() {
               <MaterialCommunityIcons
                 name="account-wrench"
                 size={40}
-                color={colors.accent}
+                color={colors.brandStrong}
               />
             </View>
           ),
@@ -309,7 +309,7 @@ export default function BottomTabs() {
               <MaterialCommunityIcons
                 name="chat-plus-outline"
                 size={40}
-                color={colors.accent}
+                color={colors.brandStrong}
               />
             </View>
           ),
