@@ -357,7 +357,6 @@ export default function Discuss() {
 
 // Enhanced styles for Discuss component
 const discussPageStyles = StyleSheet.create({
-  // Composed onto `styles.input`.
   input: {
     width: "100%",
     padding: 12,

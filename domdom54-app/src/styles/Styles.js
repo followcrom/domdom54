@@ -9,10 +9,7 @@ export default StyleSheet.create({
     alignItems: "center",
   },
 
-  // The type only. The 80%-wide indented column it used to carry lives in
-  // `titleBlock` below, because only one of the four screens with a title wants it -
-  // MeditationHistory had to undo `width` and `marginLeft` property by property, and
-  // Wisdom and Contact skipped this style altogether and redeclared the type instead.
+  // Type only - layout lives in `titleBlock`, which most titles do not want.
   title: {
     fontSize: 28,
     fontWeight: "bold",
@@ -22,7 +19,6 @@ export default StyleSheet.create({
     textAlign: "center",
   },
 
-  // The indented column a message title sits in. Compose it onto `title`.
   titleBlock: {
     width: "80%",
     marginLeft: "10%",
@@ -119,20 +115,14 @@ export default StyleSheet.create({
     marginLeft: 0,
   },
 
-  // The shared text-input control. Contact, Discuss and Wisdom each had their own
-  // full copy of these five properties; the radius and padding stay local because
-  // the three fields are genuinely different sizes.
-  // Label on the left, control or value on the right. Settings and MeditationHistory
-  // between them had four verbatim copies of these three properties; padding and
-  // rules stay local, because each row sits in a different container.
+  // Label left, control or value right. Padding and rules stay local.
   row: {
     flexDirection: "row",
     alignItems: "center",
     justifyContent: "space-between",
   },
 
-  // Elevation. `shadowColor` is always black - it darkens a surface, it is not a
-  // palette colour, which is why it is not a token choice.
+  // `shadowColor` is always black: it darkens a surface, it is not a palette choice.
   shadowSm: {
     shadowColor: colors.shadow,
     shadowOffset: { width: 0, height: 1 },
@@ -141,6 +131,7 @@ export default StyleSheet.create({
     elevation: 2,
   },
 
+  // Radius and padding stay local: the three fields are genuinely different sizes.
   input: {
     borderWidth: 1,
     borderColor: colors.border,
@@ -185,9 +176,7 @@ export default StyleSheet.create({
     padding: 5,
   },
 
-  // The error line for the shared `useAudioPlayback` hook. Lives next to the
-  // container it renders inside, so every screen with audio reports failure the
-  // same way - Wisdom and Message had drifted into two identical copies of this.
+  // The error line for the shared `useAudioPlayback` hook.
   audioError: {
     color: colors.danger,
     fontSize: 14,

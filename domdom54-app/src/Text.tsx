@@ -345,7 +345,6 @@ export default function TextPage() {
 }
 
 const wisdomStyles = StyleSheet.create({
-  // Composed onto `styles.input`.
   input: {
     width: "80%",
     margin: 10,

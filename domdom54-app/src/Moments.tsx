@@ -229,7 +229,6 @@ useEffect(() => {
 
 // Styles for SpeechPage component
 const speechPageStyles = StyleSheet.create({
-  // Composed onto `styles.transportButtonsRow`, which this used to restate in full.
   transportButtonsRow: {
     padding: 10,
     backgroundColor: colors.page,

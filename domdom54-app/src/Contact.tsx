@@ -287,8 +287,7 @@ const contactStyles = StyleSheet.create({
     marginBottom: 0,
     padding: 5,
   },
-  // Overrides `styles.title`: this screen's heading is ink rather than brand blue,
-  // and sits tight to the top of the form rather than 10px down.
+  // Ink rather than brand blue, and tight to the top of the form.
   title: {
     color: colors.textPrimary,
     marginTop: 0,

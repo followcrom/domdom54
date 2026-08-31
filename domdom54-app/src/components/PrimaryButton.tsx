@@ -12,24 +12,17 @@ import colors from "../styles/colors";
 /**
  * The app's blue button, everywhere.
  *
- * Five of these were assembled by hand - three in Wisdom, one in Discuss, one in
- * Contact - each repeating the same wrapper View, the same TouchableOpacity, and
- * the same `disabled ? textDisabled : textInverse` ternary in two or three places.
- * Contact's had drifted into a different shape entirely.
- *
- * The disabled treatment is the reason this is a component rather than just a
- * style: it has to reach the container, the label and the icon at once, and every
- * caller getting that right by hand is exactly how Wisdom's Discuss button ended
- * up non-interactive but still looking enabled.
+ * A component rather than just a style because the disabled treatment has to reach
+ * the container, the label and the icon at once - callers doing that by hand is how
+ * one button ended up non-interactive while still looking enabled.
  */
 type PrimaryButtonProps = {
   label: string;
   onPress: () => void;
   /**
    * Optional leading icon. Called with the colour the label is using, so the icon
-   * dims along with the rest of the button and callers never repeat the ternary.
-   * A callback rather than an element because the icons come from two different
-   * families (Ionicons and MaterialCommunityIcons).
+   * dims with the button. A callback rather than an element because the icons come
+   * from two families (Ionicons and MaterialCommunityIcons).
    */
   renderIcon?: (color: string) => React.ReactNode;
   disabled?: boolean;
