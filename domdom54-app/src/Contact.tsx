@@ -200,7 +200,7 @@ export default function Contact({ navigation }: ContactProps) {
               style={[styles.input, contactStyles.input, errors.name && styles.inputError]}
               value={formData.name}
               onChangeText={(value) => handleInputChange('name', value)}
-              placeholder="Enter your full name"
+              placeholder="Dolly Parton"
               placeholderTextColor={colors.textSecondary}
             />
             {errors.name && <Text style={contactStyles.errorText}>{errors.name}</Text>}
@@ -213,7 +213,7 @@ export default function Contact({ navigation }: ContactProps) {
               style={[styles.input, contactStyles.input, errors.email && styles.inputError]}
               value={formData.email}
               onChangeText={(value) => handleInputChange('email', value)}
-              placeholder="Enter your email address"
+              placeholder="dolly@example.com"
               placeholderTextColor={colors.textSecondary}
               keyboardType="email-address"
               autoCapitalize="none"
@@ -228,7 +228,7 @@ export default function Contact({ navigation }: ContactProps) {
               style={[styles.input, contactStyles.input, errors.subject && styles.inputError]}
               value={formData.subject}
               onChangeText={(value) => handleInputChange('subject', value)}
-              placeholder="What is this about?"
+              placeholder="Hello World"
               placeholderTextColor={colors.textSecondary}
             />
             {errors.subject && <Text style={contactStyles.errorText}>{errors.subject}</Text>}
@@ -260,6 +260,11 @@ export default function Contact({ navigation }: ContactProps) {
             label={isLoading ? 'Sending...' : 'Send Message'}
             onPress={handleSubmit}
             disabled={isLoading}
+            renderIcon={(color) => (
+              <Ionicons name="chatbubbles-sharp" size={48} color={color} />
+            )}
+            accessibilityLabel="Send your message"
+            accessibilityHint="Sends the message to our support team"
           />
         </View>
       </ScrollView>
@@ -289,7 +294,7 @@ const contactStyles = StyleSheet.create({
   },
   // Ink rather than brand blue, and tight to the top of the form.
   title: {
-    color: colors.textPrimary,
+    color: colors.brandStrong,
     marginTop: 0,
     marginBottom: 5,
   },
@@ -309,8 +314,6 @@ const contactStyles = StyleSheet.create({
     color: colors.textPrimary,
     marginBottom: 8,
   },
-  // Composed onto `styles.input`. The textarea is that field plus a height - it used
-  // to be a second full copy of all seven properties.
   input: {
     padding: 15,
   },
