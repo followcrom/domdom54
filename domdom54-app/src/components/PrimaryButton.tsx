@@ -20,11 +20,11 @@ type PrimaryButtonProps = {
   label: string;
   onPress: () => void;
   /**
-   * Optional leading icon. Called with the colour the label is using, so the icon
-   * dims with the button. A callback rather than an element because the icons come
-   * from two families (Ionicons and MaterialCommunityIcons).
+   * Leading icon. Called with the colour the label is using, so the icon dims with
+   * the button. A callback rather than an element because the icons come from two
+   * families (Ionicons and MaterialCommunityIcons).
    */
-  renderIcon?: (color: string) => React.ReactNode;
+  renderIcon: (color: string) => React.ReactNode;
   disabled?: boolean;
   /** Merged onto the container, for one-off spacing. */
   style?: StyleProp<ViewStyle>;
@@ -59,14 +59,8 @@ export function PrimaryButton({
         accessibilityHint={accessibilityHint}
         accessibilityState={{ disabled }}
       >
-        {renderIcon?.(tint)}
-        <Text
-          style={[
-            styles.buttonText,
-            !renderIcon && styles.buttonTextNoIcon,
-            disabled && styles.buttonTextDisabled,
-          ]}
-        >
+        {renderIcon(tint)}
+        <Text style={[styles.buttonText, disabled && styles.buttonTextDisabled]}>
           {label}
         </Text>
       </TouchableOpacity>

@@ -101,18 +101,13 @@ export default StyleSheet.create({
     flexDirection: "row",
   },
 
+  // marginLeft is the gap after the icon, which every button has.
   buttonText: {
     fontSize: 20,
     fontWeight: "bold",
     color: colors.textInverse,
     marginLeft: 10,
     padding: 16,
-  },
-
-  // `buttonText`'s marginLeft is the gap after the icon, so a button with no icon
-  // (Contact's) has to drop it or its label sits 10px off centre.
-  buttonTextNoIcon: {
-    marginLeft: 0,
   },
 
   // Label left, control or value right. Padding and rules stay local.
