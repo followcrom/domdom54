@@ -316,7 +316,7 @@ export default function Settings() {
   // you got" are the same thought and the link is the one you can act on.
   const statusLine = (() => {
     if (osPermission === "checking") return "Checking...";
-    if (isPermissionBlocked) return "Notifications are blocked in your device settings.";
+    if (isPermissionBlocked) return "Notifications are currently blocked in your device settings.";
     if (switchOn) return null;
     return "Turn on to receive messages.";
   })();

@@ -28,7 +28,11 @@ export type TabParamList = {
   Messages: Partial<MessageData> | undefined;
   Settings: undefined;
   Home: undefined;
-  Discuss: { discussPhrase: string };
+  // Optional, not required: Wisdom always passes a phrase, but Discuss is a
+  // registered route in a navigator using backBehavior="initialRoute", so it can
+  // be focused in states where nothing passed it params at all. Discuss reads it
+  // as `route.params?.discussPhrase` precisely because of that.
+  Discuss: { discussPhrase?: string } | undefined;
 };
 
 const Tab = createBottomTabNavigator<TabParamList>();
@@ -52,13 +56,33 @@ const screenIcons: Record<TabName, { focused: MaterialCommunityIconName; unfocus
 // Tab names that should be visible in the tab bar
 const visibleTabs: TabName[] = ['Wisdom', 'Moments', 'Meditations', 'Messages', 'Settings'];
 
+/**
+ * Hidden routes that are a continuation of a visible tab rather than a peer of
+ * one, and the tab that stays lit while you're on them. Discuss is only ever
+ * reached from Wisdom, carrying a Wisdom phrase, so Wisdom is where you still
+ * are - without this the bar answers "you are here: nowhere" on a screen you
+ * arrived at by tapping a lit tab.
+ *
+ * Home is deliberately NOT listed. It's hidden too, and it's the initial route,
+ * but it belongs to no tab - so nothing lights on it, which is the honest answer.
+ */
+const parentTab: Partial<Record<string, TabName>> = {
+  Discuss: 'Wisdom',
+};
+
 // Custom Tab Bar Component
 function CustomTabBar({ state, descriptors, navigation }: BottomTabBarProps) {
   const insets = useSafeAreaInsets();
   
-  const visibleRoutes = state.routes.filter(route => 
+  const visibleRoutes = state.routes.filter(route =>
     visibleTabs.includes(route.name as TabName)
   );
+
+  // Which tab reads as current. Route names are unique within a navigator, so
+  // comparing by name is equivalent to the old index comparison for the five
+  // real tabs, and it lets a hidden route borrow its parent's highlight.
+  const activeName = state.routes[state.index].name;
+  const litTab = parentTab[activeName] ?? activeName;
 
   return (
     <View style={[styles.tabBarContainer, { paddingBottom: insets.bottom }]}>
@@ -78,10 +102,13 @@ function CustomTabBar({ state, descriptors, navigation }: BottomTabBarProps) {
           }
         }
         
-        // Find the actual index in the full state
-        const routeIndex = state.routes.findIndex(r => r.key === route.key);
-        const isFocused = state.index === routeIndex;
-        
+        // Lit is not the same as current. On Discuss, Wisdom is lit but is NOT
+        // the route you're on, and tapping it has to take you back there - so
+        // the tap guard tests the real route, not the highlight. Conflating the
+        // two would make the lit tab inert and strand you on Discuss.
+        const isFocused = route.name === litTab;
+        const isCurrentRoute = route.name === activeName;
+
         const onPress = () => {
           const event = navigation.emit({
             type: 'tabPress',
@@ -89,7 +116,7 @@ function CustomTabBar({ state, descriptors, navigation }: BottomTabBarProps) {
             canPreventDefault: true,
           });
 
-          if (!isFocused && !event.defaultPrevented) {
+          if (!isCurrentRoute && !event.defaultPrevented) {
             navigation.navigate(route.name);
           }
         };
@@ -140,16 +167,6 @@ function CustomTabBar({ state, descriptors, navigation }: BottomTabBarProps) {
 // Main Tab Navigator with custom tab bar
 export default function BottomTabs() {
   const insets = useSafeAreaInsets();
-
-  // React Navigation treats headerStyle.height as the header's TOTAL height, with
-  // the status bar inset consumed inside it — so a fixed total leaves less and less
-  // room for the title as the status bar grows. Android 16 / Pixel 9 has a taller
-  // status bar than the A32, which pushed the 38pt title into the content below.
-  //
-  // This is the height of the title area ONLY; the status bar is added on top. The
-  // old fixed total of 90 already had ~24dp of A32 status bar inside it, so ~66 is
-  // the like-for-like equivalent — the A32 header stays the size it always was,
-  // while taller status bars grow the header instead of squeezing the title.
   const HEADER_CONTENT_HEIGHT = 66;
 
   const headerStyle = {
@@ -323,7 +340,7 @@ const styles = StyleSheet.create({
   // Custom Tab Bar Styles
   tabBarContainer: {
     flexDirection: 'row',
-    borderTopWidth: 2,
+    borderTopWidth: 1.5,
     borderTopColor: colors.brand,
     paddingTop: 5,
     paddingHorizontal: 2,

@@ -15,7 +15,8 @@ import colors from "./styles/colors";
 import { Banner, Body, Card } from "./components/Layout";
 import { PrimaryButton } from "./components/PrimaryButton";
 import { useNavigation } from "@react-navigation/native";
-import { StackNavigationProp } from "@react-navigation/stack";
+import { BottomTabNavigationProp } from "@react-navigation/bottom-tabs";
+import type { TabParamList } from "./navigation/Tabs";
 import { useAudioPlayback } from "./hooks/useAudioPlayback";
 
 // This screen is a single phrase display with two ways to fill it: shuffle
@@ -49,12 +50,12 @@ type SearchResponseItem = {
   title: string;
 };
 
-type RootStackParamList = {
-  Wisdom: undefined;
-  Discuss: { discussPhrase: string };
-};
-
-type WisdomNavigationProp = StackNavigationProp<RootStackParamList, "Wisdom">;
+// Wisdom and Discuss are both tabs, so this is the TAB navigator's param list -
+// the local copy it replaces was named for the stack and typed with
+// StackNavigationProp, which advertised push/replace/pop. A bottom-tab navigator
+// implements none of those: they would have compiled here and then gone
+// unhandled at runtime.
+type WisdomNavigationProp = BottomTabNavigationProp<TabParamList, "Wisdom">;
 
 const RANDOM_ENDPOINT =
   "https://ur3fnc2j12.execute-api.eu-west-2.amazonaws.com/getPhraseStage/getphrase";

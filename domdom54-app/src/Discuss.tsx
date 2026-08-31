@@ -19,6 +19,7 @@ import {
   useFocusEffect,
   RouteProp,
 } from "@react-navigation/native";
+import type { TabParamList } from "./navigation/Tabs";
 
 // --- Type Definitions ---
 type ConversationMessage = {
@@ -27,11 +28,11 @@ type ConversationMessage = {
   timestamp?: number;
 };
 
-type RootStackParamList = {
-  Discuss: { discussPhrase?: string };
-};
-
-type DiscussScreenRouteProp = RouteProp<RootStackParamList, "Discuss">;
+// Discuss is a tab, so its params come from the tab navigator's own list rather
+// than a local restatement of them. The optional `discussPhrase` this file had
+// always declared is now what TabParamList says too, so the two can no longer
+// disagree about whether a phrase is guaranteed.
+type DiscussScreenRouteProp = RouteProp<TabParamList, "Discuss">;
 
 type APIError = {
   message: string;
@@ -327,7 +328,7 @@ export default function Discuss() {
             ref={textInputRef}
             style={[styles.input, styles.shadowSm, discussPageStyles.input]}
             accessibilityLabel="Input field for talking to followCrom"
-            placeholder="Talk to followCrom..."
+            placeholder="Ask followCrom..."
             value={userInput}
             onChangeText={setUserInput}
             onSubmitEditing={handleSubmitEditing}
@@ -341,7 +342,7 @@ export default function Discuss() {
         </Card>
 
         <PrimaryButton
-          label={loading ? "Asking..." : "Ask away!"}
+          label={loading ? "Asking..." : "Let's chat!"}
           onPress={handleFollowUp}
           disabled={loading || !userInput.trim()}
           accessibilityLabel="Ask followCrom"
