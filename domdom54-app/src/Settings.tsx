@@ -395,7 +395,7 @@ export default function Settings() {
         />
       </Card>
 
-            <Card style={settingsStyles.card}>
+      <Card style={settingsStyles.card}>
         <Text style={[settingsStyles.heading, settingsStyles.cardHeading]}>
           More
         </Text>
