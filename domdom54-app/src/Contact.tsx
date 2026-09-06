@@ -12,8 +12,11 @@ import {
 } from 'react-native';
 import { Ionicons } from "@expo/vector-icons";
 import { StackNavigationProp } from "@react-navigation/stack";
+import type { RootStackParamList } from "../App";
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
+import styles from './styles/Styles';
 import colors from './styles/colors';
+import { PrimaryButton } from './components/PrimaryButton';
 
 // Define types for form data and errors
 interface FormData {
@@ -30,12 +33,9 @@ interface FormErrors {
   message?: string;
 }
 
-// Define navigation prop type
-type RootStackParamList = {
-  Home: undefined;
-  Contact: undefined;
-};
-
+// The stack's own param list, not a local copy. Contact is a genuine stack
+// route, so this one keeps its second argument - the `Home` the local copy also
+// declared was never a stack route, and nothing here navigated to it.
 type ContactScreenNavigationProp = StackNavigationProp<
   RootStackParamList,
   'Contact'
@@ -147,7 +147,7 @@ export default function Contact({ navigation }: ContactProps) {
   return (
     <KeyboardAvoidingView
       behavior="height"
-      style={{ flex: 1 }}
+      style={contactStyles.container}
       keyboardVerticalOffset={50}
     >
       <ScrollView
@@ -169,7 +169,7 @@ export default function Contact({ navigation }: ContactProps) {
           />
         </View>
         <View style={contactStyles.formContainer}>
-          <Text style={contactStyles.title}>Contact Us</Text>
+          <Text style={[styles.title, contactStyles.title]}>Contact Us</Text>
           <Text style={contactStyles.subtitle}>
             We'd love to hear from you. Send us a message and we'll respond as soon as possible.
           </Text>
@@ -195,10 +195,10 @@ export default function Contact({ navigation }: ContactProps) {
           <View style={contactStyles.inputContainer}>
             <Text style={contactStyles.label}>Name *</Text>
             <TextInput
-              style={[contactStyles.input, errors.name && contactStyles.inputError]}
+              style={[styles.input, contactStyles.input, errors.name && styles.inputError]}
               value={formData.name}
               onChangeText={(value) => handleInputChange('name', value)}
-              placeholder="Enter your full name"
+              placeholder="Dolly Parton"
               placeholderTextColor={colors.textSecondary}
             />
             {errors.name && <Text style={contactStyles.errorText}>{errors.name}</Text>}
@@ -208,10 +208,10 @@ export default function Contact({ navigation }: ContactProps) {
           <View style={contactStyles.inputContainer}>
             <Text style={contactStyles.label}>Email *</Text>
             <TextInput
-              style={[contactStyles.input, errors.email && contactStyles.inputError]}
+              style={[styles.input, contactStyles.input, errors.email && styles.inputError]}
               value={formData.email}
               onChangeText={(value) => handleInputChange('email', value)}
-              placeholder="Enter your email address"
+              placeholder="dolly@example.com"
               placeholderTextColor={colors.textSecondary}
               keyboardType="email-address"
               autoCapitalize="none"
@@ -223,10 +223,10 @@ export default function Contact({ navigation }: ContactProps) {
           <View style={contactStyles.inputContainer}>
             <Text style={contactStyles.label}>Subject *</Text>
             <TextInput
-              style={[contactStyles.input, errors.subject && contactStyles.inputError]}
+              style={[styles.input, contactStyles.input, errors.subject && styles.inputError]}
               value={formData.subject}
               onChangeText={(value) => handleInputChange('subject', value)}
-              placeholder="What is this about?"
+              placeholder="Hello Dolly"
               placeholderTextColor={colors.textSecondary}
             />
             {errors.subject && <Text style={contactStyles.errorText}>{errors.subject}</Text>}
@@ -236,7 +236,12 @@ export default function Contact({ navigation }: ContactProps) {
           <View style={contactStyles.inputContainer}>
             <Text style={contactStyles.label}>Message *</Text>
             <TextInput
-              style={[contactStyles.textArea, errors.message && contactStyles.inputError]}
+              style={[
+                styles.input,
+                contactStyles.input,
+                contactStyles.textArea,
+                errors.message && styles.inputError,
+              ]}
               value={formData.message}
               onChangeText={(value) => handleInputChange('message', value)}
               placeholder="Enter your message here..."
@@ -249,18 +254,16 @@ export default function Contact({ navigation }: ContactProps) {
           </View>
 
           {/* Submit Button */}
-          <TouchableOpacity
-            style={[contactStyles.submitButton, isLoading && contactStyles.submitButtonDisabled]}
+          <PrimaryButton
+            label={isLoading ? 'Sending...' : 'Send Message'}
             onPress={handleSubmit}
             disabled={isLoading}
-          >
-            <Text style={[
-              contactStyles.submitButtonText,
-              isLoading && contactStyles.submitButtonTextDisabled,
-            ]}>
-              {isLoading ? 'Sending...' : 'Send Message'}
-            </Text>
-          </TouchableOpacity>
+            renderIcon={(color, size) => (
+              <Ionicons name="chatbubbles-sharp" size={size} color={color} />
+            )}
+            accessibilityLabel="Send your message"
+            accessibilityHint="Sends the message to our support team"
+          />
         </View>
       </ScrollView>
     </KeyboardAvoidingView>
@@ -268,9 +271,20 @@ export default function Contact({ navigation }: ContactProps) {
 }
 
 const contactStyles = StyleSheet.create({
+  // The screen's own background. This style existed before and was never applied to
+  // anything - the root carried an inline { flex: 1 } - so Contact's colour came from
+  // the navigation theme and this `backgroundColor` did nothing at all.
+  //
+  // White rather than the page tint. Contact is a form - a column of bordered fields
+  // and nothing else - and the tint gives it a colour cast it has no use for.
+  //
+  // `card`, not a new background token: the palette does not grow for this. The
+  // trade-off is that the fields no longer sit ON a surface, they ARE the surface,
+  // so they rely entirely on `border` to identify themselves - which is exactly the
+  // job that token is published for, at 3.56:1 on white.
   container: {
     flex: 1,
-    backgroundColor: colors.page,
+    backgroundColor: colors.card,
   },
   scrollContent: {
     flexGrow: 1,
@@ -287,12 +301,11 @@ const contactStyles = StyleSheet.create({
     marginBottom: 0,
     padding: 5,
   },
+  // Ink rather than brand blue, and tight to the top of the form.
   title: {
-    fontSize: 28,
-    fontWeight: 'bold',
-    color: colors.textPrimary,
+    color: colors.brandStrong,
+    marginTop: 0,
     marginBottom: 5,
-    textAlign: 'center',
   },
   subtitle: {
     fontSize: 16,
@@ -311,61 +324,15 @@ const contactStyles = StyleSheet.create({
     marginBottom: 8,
   },
   input: {
-    borderWidth: 1,
-    borderColor: colors.border,
-    borderRadius: 8,
     padding: 15,
-    fontSize: 16,
-    backgroundColor: colors.card,
-    color: colors.textPrimary,
   },
   textArea: {
-    borderWidth: 1,
-    borderColor: colors.border,
-    borderRadius: 8,
-    padding: 15,
-    fontSize: 16,
-    backgroundColor: colors.card,
-    color: colors.textPrimary,
     minHeight: 100,
-  },
-  inputError: {
-    borderColor: colors.danger,
   },
   errorText: {
     color: colors.danger,
     fontSize: 14,
     marginTop: 5,
-  },
-  submitButton: {
-    backgroundColor: colors.brandStrong,
-    borderRadius: 8,
-    padding: 16,
-    alignItems: 'center',
-    marginTop: 0,
-    shadowColor: colors.shadow,
-    shadowOffset: {
-      width: 0,
-      height: 2,
-    },
-    shadowOpacity: 0.1,
-    shadowRadius: 3,
-    elevation: 3,
-  },
-  // Matches the primary button's disabled treatment: a white fill with a border outline
-  // rather than a grey slab, so the label stays legible at 3.57:1.
-  submitButtonDisabled: {
-    backgroundColor: colors.card,
-    borderWidth: 1,
-    borderColor: colors.border,
-  },
-  submitButtonText: {
-    color: colors.textInverse,
-    fontSize: 18,
-    fontWeight: '600',
-  },
-  submitButtonTextDisabled: {
-    color: colors.textDisabled,
   },
   successBanner: {
     backgroundColor: colors.successSurface,

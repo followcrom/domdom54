@@ -16,7 +16,7 @@ import styles from "../styles/Styles";
  *
  *   const { width, height } = useWindowDimensions();
  *   const isLandscape = width > height;
- *   <View style={[styles.textContainer, isLandscape && styles.textContainerLandscape]}>
+ *   <View style={[styles.surface, styles.contentWidth, styles.cardPad]}>
  *     <Text style={[styles.textOutput, isLandscape && styles.textOutputLandscape]}>
  *
  * That's four lines of boilerplate per screen and an orientation rule duplicated
@@ -57,7 +57,9 @@ export function Card({ style, ...rest }: ViewProps) {
     <View
       {...rest}
       style={[
-        styles.textContainer,
+        styles.surface,
+        styles.contentWidth,
+        styles.cardPad,
         isLandscape && styles.textContainerLandscape,
         style,
       ]}

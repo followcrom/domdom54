@@ -5,7 +5,6 @@ import {
   ScrollView,
   View,
   TextInput,
-  TouchableOpacity,
   ActivityIndicator,
   Keyboard,
   ToastAndroid,
@@ -14,8 +13,11 @@ import { Ionicons, MaterialCommunityIcons } from "@expo/vector-icons";
 import styles from "./styles/Styles";
 import colors from "./styles/colors";
 import { Banner, Body, Card } from "./components/Layout";
+import { PrimaryButton } from "./components/PrimaryButton";
+import { ListenButton } from "./components/ListenButton";
 import { useNavigation } from "@react-navigation/native";
-import { StackNavigationProp } from "@react-navigation/stack";
+import { BottomTabNavigationProp } from "@react-navigation/bottom-tabs";
+import type { TabParamList } from "./navigation/Tabs";
 import { useAudioPlayback } from "./hooks/useAudioPlayback";
 
 // This screen is a single phrase display with two ways to fill it: shuffle
@@ -49,12 +51,12 @@ type SearchResponseItem = {
   title: string;
 };
 
-type RootStackParamList = {
-  Wisdom: undefined;
-  Discuss: { discussPhrase: string };
-};
-
-type WisdomNavigationProp = StackNavigationProp<RootStackParamList, "Wisdom">;
+// Wisdom and Discuss are both tabs, so this is the TAB navigator's param list -
+// the local copy it replaces was named for the stack and typed with
+// StackNavigationProp, which advertised push/replace/pop. A bottom-tab navigator
+// implements none of those: they would have compiled here and then gone
+// unhandled at runtime.
+type WisdomNavigationProp = BottomTabNavigationProp<TabParamList, "Wisdom">;
 
 const RANDOM_ENDPOINT =
   "https://ur3fnc2j12.execute-api.eu-west-2.amazonaws.com/getPhraseStage/getphrase";
@@ -229,7 +231,7 @@ export default function TextPage() {
       {searchOpen && (
         <TextInput
           ref={inputRef}
-          style={wisdomStyles.input}
+          style={[styles.input, wisdomStyles.input]}
           value={query}
           accessibilityLabel="Search input field"
           onChangeText={setQuery}
@@ -285,91 +287,67 @@ export default function TextPage() {
                 guard, "Please enter a search term." would appear under the
                 previous phrase's title. */}
             {!notice && phrase?.title && (
-              <Text style={wisdomStyles.title}>{phrase.title}</Text>
+              <Text style={[styles.title, styles.titleCard]}>{phrase.title}</Text>
             )}
             <Body onPress={showId}>{notice ?? phrase?.phrase ?? ""}</Body>
 
             {phrase?.audio && (
-              <View style={styles.audioContainer}>
-                {isLoadingPlayback ? (
-                  <ActivityIndicator size="large" color={colors.brand} />
-                ) : (
-                  <Ionicons
-                    name={isPlaying ? "pause-circle-outline" : "play-circle-outline"}
-                    size={48}
-                    color={isPlaying ? colors.accentStrong : colors.brand}
-                    onPress={togglePlayPause}
-                  />
-                )}
-                {audioError && (
-                  <Text style={wisdomStyles.audioError}>{audioError}</Text>
-                )}
-              </View>
+              <ListenButton
+                isPlaying={isPlaying}
+                isLoadingPlayback={isLoadingPlayback}
+                audioError={audioError}
+                onToggle={togglePlayPause}
+              />
             )}
           </>
         )}
       </Card>
 
-      <View style={styles.buttonContainer}>
-        <TouchableOpacity style={styles.buttonIcon} onPress={getRandomPhrase}>
-          <Ionicons name="bulb-outline" size={48} color={colors.textInverse} />
-          <Text style={styles.buttonText}>Generate Wisdom</Text>
-        </TouchableOpacity>
-      </View>
+      <PrimaryButton
+        label="Generate Wisdom"
+        onPress={getRandomPhrase}
+        renderIcon={(color, size) => (
+          <Ionicons name="bulb-outline" size={size} color={color} />
+        )}
+      />
 
-      <View style={styles.buttonContainer}>
-        <TouchableOpacity style={styles.buttonIcon} onPress={handleSearchPress}>
+      <PrimaryButton
+        label="Search"
+        onPress={handleSearchPress}
+        renderIcon={(color, size) => (
           <MaterialCommunityIcons
             name="comment-search-outline"
-            size={48}
-            color={colors.textInverse}
+            size={size}
+            color={color}
           />
-          <Text style={styles.buttonText}>Search</Text>
-        </TouchableOpacity>
-      </View>
+        )}
+      />
 
-      <View style={styles.buttonContainer}>
-        <TouchableOpacity
-          style={styles.buttonIcon}
-          onPress={() =>
-            navigation.navigate("Discuss", { discussPhrase: phrase?.phrase ?? "" })
-          }
-          disabled={!phrase || loading}
-        >
-          <Ionicons name="chatbubbles-sharp" size={48} color={colors.textInverse} />
-          <Text style={styles.buttonText}>Discuss</Text>
-        </TouchableOpacity>
-      </View>
+      <PrimaryButton
+        label="Discuss"
+        onPress={() =>
+          navigation.navigate("Discuss", { discussPhrase: phrase?.phrase ?? "" })
+        }
+        disabled={!phrase || loading}
+        renderIcon={(color, size) => (
+          <Ionicons name="chatbubbles-sharp" size={size} color={color} />
+        )}
+      />
+
+      {/* The buttons have marginBottom 0 so the stack ends where it ends; this is
+          the gap above the tab bar. */}
+      <View style={{ height: 16 }} />
     </ScrollView>
   );
 }
 
 const wisdomStyles = StyleSheet.create({
-  title: {
-    fontSize: 28,
-    fontWeight: "bold",
-    color: colors.brandStrong,
-    marginTop: 10,
-    textAlign: "center",
-  },
-  audioError: {
-    color: colors.danger,
-    fontSize: 14,
-    textAlign: "center",
-    marginTop: 8,
-  },
   input: {
-    width: "80%",
-    fontSize: 16,
-    borderColor: colors.border,
-    borderWidth: 1,
-    borderRadius: 5,
-    margin: 10,
+    width: "90%",
+    marginTop: 14,
     paddingTop: 12,
     paddingBottom: 12,
     paddingLeft: 12,
-    color: colors.textPrimary,
-    backgroundColor: colors.card,
   },
   resultsTopline: {
     fontSize: 24,

@@ -79,8 +79,10 @@ open_a_terminal_here.bat
 Record the screen with:
 
 ```bash
-scrcpy --r filename.mp4
+scrcpy --record="C:\Users\teedc\Documents\WSL\domdom54\FOREGROUND_SERVICE_MEDIA_PLAYBACK.mp4"
 ```
+
+You can't record to C:\Program Files (x86) (not writable without admin).
 
 <br>
 

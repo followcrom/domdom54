@@ -6,7 +6,7 @@ import {
   View,
   ActivityIndicator,
   TextInput,
-  TouchableOpacity,
+  Pressable,
   Keyboard,
   KeyboardAvoidingView,
 } from "react-native";
@@ -19,6 +19,7 @@ import {
   useFocusEffect,
   RouteProp,
 } from "@react-navigation/native";
+import type { TabParamList } from "./navigation/Tabs";
 
 // --- Type Definitions ---
 type ConversationMessage = {
@@ -27,11 +28,11 @@ type ConversationMessage = {
   timestamp?: number;
 };
 
-type RootStackParamList = {
-  Discuss: { discussPhrase?: string };
-};
-
-type DiscussScreenRouteProp = RouteProp<RootStackParamList, "Discuss">;
+// Discuss is a tab, so its params come from the tab navigator's own list rather
+// than a local restatement of them. The optional `discussPhrase` this file had
+// always declared is now what TabParamList says too, so the two can no longer
+// disagree about whether a phrase is guaranteed.
+type DiscussScreenRouteProp = RouteProp<TabParamList, "Discuss">;
 
 type APIError = {
   message: string;
@@ -74,7 +75,6 @@ export default function Discuss() {
   const abortControllerRef = useRef<AbortController | null>(null);
 
   // State management
-  const [outputText, setOutputText] = useState("");
   const [loading, setLoading] = useState(false);
   const [userInput, setUserInput] = useState("");
   const [conversationHistory, setConversationHistory] = useState<ConversationMessage[]>([]);
@@ -97,7 +97,6 @@ export default function Discuss() {
     // Reset UI state
     setConversationHistory([]);
     setUserInput("");
-    setOutputText("");
     setLoading(false);
   }, []);
 
@@ -107,17 +106,20 @@ export default function Discuss() {
       resetState(); // Clear state first
       setLoading(true);
 
+      // The phrase goes up BEFORE the request, not after it. It is already known -
+      // it arrived in the route params - so making the user stare at an empty card
+      // until the model answers was never necessary.
+      addToConversation("user", phrase);
+
       const initialPrompt = `Provide a concise, insightful expansion on the following quote without restating it: "${phrase}"`;
-      
+
       const messages: ConversationMessage[] = [
         systemMessage,
         { role: "user", content: initialPrompt, timestamp: Date.now() }
       ];
 
       const response = await fetchOpenAIResponse(messages);
-      
-      setOutputText(response);
-      addToConversation("user", phrase);
+
       addToConversation("assistant", response);
       
       // Auto-scroll to show response
@@ -127,8 +129,13 @@ export default function Discuss() {
       
     } catch (error: any) {
       console.error("Reset and fetch error:", error);
-      const errorMessage = "followCrom says: I apologize, but I'm having trouble connecting to my wisdom right now. Please try again.";
-      setOutputText(errorMessage);
+      // Into the conversation, where it is actually rendered. This used to go to
+      // `outputText`, which nothing displayed - so a failed request left the screen
+      // blank and silent.
+      addToConversation(
+        "assistant",
+        "followCrom says: I apologize, but I'm having trouble connecting to my wisdom right now. Please try again."
+      );
     } finally {
       setLoading(false);
     }
@@ -259,13 +266,13 @@ export default function Discuss() {
         { role: "user", content: trimmedInput, timestamp: Date.now() }
       ];
 
-      const response = await fetchOpenAIResponse(messages);
-      
-      setOutputText(response);
+      // Same order as above: the user's turn appears immediately, the reply follows.
       addToConversation("user", trimmedInput);
-      addToConversation("assistant", response);
-      
       setUserInput("");
+
+      const response = await fetchOpenAIResponse(messages);
+
+      addToConversation("assistant", response);
       
       // Auto-scroll to show new response
       setTimeout(() => {
@@ -274,7 +281,7 @@ export default function Discuss() {
       
     } catch (error: any) {
       console.error("Follow-up error:", error);
-      setOutputText(`Error: ${error.message}`);
+      addToConversation("assistant", `Error: ${error.message}`);
     } finally {
       setLoading(false);
     }
@@ -286,6 +293,11 @@ export default function Discuss() {
       handleFollowUp();
     }
   }, [handleFollowUp, loading, userInput]);
+
+  // Send is available when there is something to send and nothing in flight. Named
+  // once so the button's enabled state, its tint and its accessibilityState cannot
+  // drift apart.
+  const canSend = !loading && userInput.trim().length > 0;
 
   return (
     <KeyboardAvoidingView
@@ -303,31 +315,40 @@ export default function Discuss() {
         <Banner />
 
         <Card>
-            <View style={{ paddingHorizontal: 10 }}>
-            {loading && conversationHistory.length === 0 ? (
-              <View style={discussPageStyles.loadingContainer}>
-              <ActivityIndicator size="large" color={colors.brand} />
+          {/* The bubbles always render, and the spinner always sits under them.
+              There used to be two spinners behind a length check - a large one that
+              replaced the conversation entirely while it was empty, and a small one
+              underneath once it was not. Since the user's turn now goes up before
+              the request, the first case only ever meant "blank screen". */}
+          <View style={{ paddingHorizontal: 10 }}>
+            {conversationHistory.map((msg, index) => (
+              <MessageBubble key={`${msg.timestamp}-${index}`} message={msg} />
+            ))}
+          </View>
+
+          {loading && (
+            <View style={discussPageStyles.loadingContainer}>
+              <ActivityIndicator size="small" color={colors.brand} />
               <Text style={discussPageStyles.loadingText}>
                 followCrom is thinking...
               </Text>
-              </View>
-            ) : (
-              conversationHistory.map((msg, index) => (
-              <MessageBubble key={`${msg.timestamp}-${index}`} message={msg} />
-              ))
-            )}
             </View>
-          {loading && conversationHistory.length > 0 && (
-            <ActivityIndicator size="small" style={{ margin: 10 }} color={colors.brand} />
           )}
         </Card>
 
-        <Card>
+        {/* Send lives in the field's own row now.
+            It was a 300pt PrimaryButton two gaps below a TextInput that sat in its
+            own Card, and it greyed out when the field was empty. That is the right
+            behaviour - every chat composer disables send on an empty field - but a
+            disabled control only explains itself when the thing it depends on is
+            next to it. Two Cards apart, the grey read as arbitrary.
+            Nothing about the states changed here; only the distance. */}
+        <View style={[styles.surface, styles.contentWidth, discussPageStyles.composer]}>
           <TextInput
             ref={textInputRef}
             style={discussPageStyles.input}
             accessibilityLabel="Input field for talking to followCrom"
-            placeholder="Talk to followCrom..."
+            placeholder="Ask followCrom..."
             value={userInput}
             onChangeText={setUserInput}
             onSubmitEditing={handleSubmitEditing}
@@ -338,31 +359,37 @@ export default function Discuss() {
             editable={!loading}
             maxLength={500}
           />
-        </Card>
 
-        <View style={[
-          styles.buttonContainer,
-          (loading || !userInput.trim()) && styles.buttonContainerDisabled,
-        ]}>
-          <TouchableOpacity 
-            style={styles.buttonIcon} 
+          {/* Pressable rather than TouchableOpacity, with an explicit circular
+              ripple. Android draws its own press/focus highlight otherwise, and on a
+              small view that highlight is square and can outlive the touch until
+              focus moves elsewhere - which is the artefact you are seeing. Giving it
+              a bounded ripple of our own replaces that drawable; `overflow: hidden`
+              on the style clips whatever is left to the circle. Unverified from
+              here - if it persists, it is a platform quirk and not worth chasing. */}
+          <Pressable
+            style={[
+              discussPageStyles.send,
+              !canSend && discussPageStyles.sendDisabled,
+            ]}
+            android_ripple={{ color: colors.divider, radius: 22, borderless: false }}
             onPress={handleFollowUp}
-            disabled={loading || !userInput.trim()}
+            disabled={!canSend}
+            accessibilityRole="button"
             accessibilityLabel="Ask followCrom"
             accessibilityHint="Send your message to followCrom for wisdom"
+            accessibilityState={{ disabled: !canSend }}
           >
-            <Ionicons 
-              name="chatbubbles-sharp" 
-              size={48} 
-              color={loading || !userInput.trim() ? colors.textDisabled : colors.textInverse} 
+            {/* No spinner here. The conversation card above already shows one -
+                two spinners for one request reads as two things happening, and
+                swapping this button's contents mid-press is also what left a
+                highlight behind on Android. */}
+            <Ionicons
+              name="arrow-up"
+              size={24}
+              color={canSend ? colors.textInverse : colors.textDisabled}
             />
-            <Text style={[
-              styles.buttonText,
-              (loading || !userInput.trim()) && styles.buttonTextDisabled
-            ]}>
-              {loading ? "Asking..." : "Ask away!"}
-            </Text>
-          </TouchableOpacity>
+          </Pressable>
         </View>
       </ScrollView>
     </KeyboardAvoidingView>
@@ -371,27 +398,55 @@ export default function Discuss() {
 
 // Enhanced styles for Discuss component
 const discussPageStyles = StyleSheet.create({
+  // The composer: one white row holding the field and its send button, so "nothing
+  // to send" is legible without a word of explanation. Composed on top of
+  // styles.surface and styles.contentWidth, so only what differs lives here -
+  // radius 26 is half the row's height, which is what makes it read as a single
+  // control rather than a panel.
+  composer: {
+    flexDirection: "row",
+    alignItems: "center",
+    marginTop: 14,
+    paddingLeft: 16,
+    paddingRight: 8,
+    paddingVertical: 8,
+    borderRadius: 26,
+  },
+
+  // No border of its own - the composer row is the control's outline.
   input: {
-    width: "100%",
-    borderColor: colors.border,
-    borderWidth: 1,
-    borderRadius: 8,
-    padding: 12,
+    flex: 1,
+    minWidth: 0,
     fontSize: 16,
     color: colors.textPrimary,
-    backgroundColor: colors.card,
+    paddingVertical: 10,
+    paddingRight: 10,
     minHeight: 44,
-    shadowColor: colors.shadow,
-    shadowOffset: {
-      width: 0,
-      height: 1,
-    },
-    shadowOpacity: 0.1,
-    shadowRadius: 2,
-    elevation: 2,
+  },
+
+  send: {
+    width: 44,
+    height: 44,
+    borderRadius: 22,
+    backgroundColor: colors.brandStrong,
+    borderWidth: 1.5,
+    borderColor: colors.brandStrong,
+    alignItems: "center",
+    justifyContent: "center",
+    // Clips anything the platform draws behind the control - Android's focus and
+    // press highlights are square and outlive the touch on a view this small.
+    overflow: "hidden",
+  },
+
+  // Same treatment as a disabled PrimaryButton: a white fill with a visible outline,
+  // not a dimmed blue, which reads as broken rather than unavailable.
+  sendDisabled: {
+    backgroundColor: colors.card,
+    borderColor: colors.border,
   },
   loadingContainer: {
-    padding: 20,
+    paddingTop: 14,
+    paddingBottom: 4,
     alignItems: "center",
   },
   loadingText: {

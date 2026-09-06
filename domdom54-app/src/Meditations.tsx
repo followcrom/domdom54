@@ -6,12 +6,11 @@ import {
   FlatList,
   StyleSheet,
 } from "react-native";
-import { MaterialCommunityIcons } from "@expo/vector-icons";
-import styles from "./styles/Styles";
+import styles, { LIST_ITEM_HEIGHT, TOP_BAR_HEIGHT } from "./styles/Styles";
 import colors from "./styles/colors";
 import { useNavigation } from "@react-navigation/native";
 import { StackNavigationProp } from "@react-navigation/stack";
-import MeditationHistory from "./MeditationHistory";
+import type { RootStackParamList } from "../App";
 
 // --- Type Definitions ---
 
@@ -21,16 +20,11 @@ type AudioFile = {
   url: string;
 };
 
-// Define the navigation props for this screen
-type RootStackParamList = {
-  Meditations: undefined;
-  MeditationPlayer: { audioUrl: string; title: string };
-};
-
-type MeditationsScreenNavigationProp = StackNavigationProp<
-  RootStackParamList,
-  "Meditations"
->;
+// The stack's own param list, not a local copy. Note there's no second type
+// argument: the local version pinned this to "Meditations", but Meditations is
+// a tab inside HomeTabs, not a route on the stack it navigates into.
+type MeditationsScreenNavigationProp =
+  StackNavigationProp<RootStackParamList>;
 
 // Define the props for the custom TabBar component
 type TabBarProps = {
@@ -54,9 +48,8 @@ const TabBar: React.FC<TabBarProps> = React.memo(({ tabs, activeTab, setActiveTa
       style={{
         flexDirection: "row",
         justifyContent: "space-around",
-        paddingTop: 20,
-        paddingBottom: 15,
-        backgroundColor: colors.card,
+        alignItems: "center",
+        minHeight: TOP_BAR_HEIGHT,
       }}
     >
       {tabs.map((tab, index) => (
@@ -67,7 +60,7 @@ const TabBar: React.FC<TabBarProps> = React.memo(({ tabs, activeTab, setActiveTa
         >
           <Text
             style={{
-              color: activeTab === index ? colors.accentStrong : colors.textSecondary,
+              color: activeTab === index ? colors.accentStrong : colors.brand,
               borderBottomWidth: activeTab === index ? 2 : 0,
               borderBottomColor:
                 activeTab === index ? colors.accent : "transparent",
@@ -108,8 +101,7 @@ const MeditationItem: React.FC<MeditationItemProps> = React.memo(({ item, index,
 export default function Meditations() {
   const navigation = useNavigation<MeditationsScreenNavigationProp>();
   const [activeTab, setActiveTab] = useState(1); // Start with tab
-  const [showHistory, setShowHistory] = useState(false);
-  const tabs = ["Short", "Medium", "Long"];
+  const tabs = ["Short", "10 mins", "Long"];
   const [audioFiles, setAudioFiles] = useState<AudioFile[]>([]);
 
   const fetchAudioFiles = async () => {
@@ -155,25 +147,14 @@ export default function Meditations() {
   // Memoized content container style
   const contentContainerStyle = useMemo(() => [
     styles.listContainer, 
-    { paddingBottom: 50 } // Add padding to the bottom for better scroll experience
+    { paddingBottom: 20 } // Add padding to the bottom for better scroll experience
   ], []);
 
   return (
     <View style={medPageStyles.container}>
-      <View style={medPageStyles.headerRow}>
-        <View style={medPageStyles.tabBarWrapper}>
-          <TabBar tabs={tabs} activeTab={activeTab} setActiveTab={setActiveTab} />
-        </View>
-        <TouchableOpacity
-          onPress={() => setShowHistory(true)}
-          style={medPageStyles.historyButton}
-          accessibilityLabel="View meditation history"
-        >
-          <MaterialCommunityIcons name="history" size={28} color={colors.brand} />
-        </TouchableOpacity>
+      <View style={medPageStyles.tabBarWrapper}>
+        <TabBar tabs={tabs} activeTab={activeTab} setActiveTab={setActiveTab} />
       </View>
-
-      <MeditationHistory visible={showHistory} onClose={() => setShowHistory(false)} />
 
       <FlatList
         contentContainerStyle={contentContainerStyle}
@@ -187,8 +168,8 @@ export default function Meditations() {
         initialNumToRender={10}
         windowSize={10}
         getItemLayout={(data, index) => ({
-          length: 60, // Adjust this to match your actual item height
-          offset: 60 * index,
+          length: LIST_ITEM_HEIGHT,
+          offset: LIST_ITEM_HEIGHT * index,
           index,
         })}
       />
@@ -201,16 +182,7 @@ const medPageStyles = StyleSheet.create({
   container: {
     flex: 1,
   },
-  headerRow: {
-    flexDirection: "row",
-    alignItems: "center",
-    backgroundColor: colors.card,
-  },
   tabBarWrapper: {
-    flex: 1,
-  },
-  historyButton: {
-    paddingHorizontal: 10,
-    paddingTop: 8,
+    backgroundColor: colors.brandSurface,
   },
 });

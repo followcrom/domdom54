@@ -20,8 +20,7 @@
 export const colors = {
   // --- Blue: the app itself. Identity, navigation, any control at rest. Never state.
   brand: "#1386FD", // 3.59 / 3.20 - transport icons, progress fill, dashed + section rules
-  brandStrong: "#006AD0", // 5.29 / 4.72 - headings, links, primary button, now-playing row
-  brandDeep: "#00468D", // 9.29 / 8.30 - list labels; the only blue that survives `alt`
+  brandStrong: "#006AD0", // 5.29 / 4.72 - headings, links, primary button
   brandSurface: "#EEF5FF", // tint - informational panels
 
   // --- Orange: "right now". The tab you are on, the thing that is playing.
@@ -47,11 +46,26 @@ export const colors = {
 
   // --- Lines
   border: "#85888C", // 3.56 / 3.18 - input outlines. Identifies the control, so needs 3:1.
-  divider: "#D7D9DC", // decorative rules, and the assistant chat bubble
+  divider: "#D7D9DC", // row rules, the switch's off track, the assistant chat bubble
 
   // --- Surfaces
   card: "#FFFFFF",
-  page: "#F2F2F2", // React Navigation's own default, now declared rather than inherited
+  // A blue tint rather than a neutral grey, chosen at the SAME luminance as the
+  // #F2F2F2 it replaces (0.888) so every ratio quoted in this file stays true -
+  // the page column above did not need recalculating. It is the darkest tint the
+  // guarantees allow: one step further and `border` and `textDisabled` fall
+  // through 3:1 (3.07 and 3.08 here, 3.01 at #E4EDF9) and textSecondary through
+  // 4.5 (4.56 here). White on it is 1.16:1, better separation than the 1.12:1
+  // the card had on grey, which is why the card reads as a surface now.
+  //
+  // This reaches the whole app, not just the screens that name it: App.tsx feeds it
+  // to the navigation theme's `background`, so screens with a transparent container
+  // (Meditations, Moments, MeditationPlayer) take it too.
+  //
+  // That includes the brandSurface bars in Meditations and Moments, and they are
+  // slightly BETTER off for it - brandSurface against this is 1.06:1, against the old
+  // grey it was 1.02:1. Faint either way; they read by their contents, not their fill.
+  page: "#E7EFFA",
   alt: "#E0E2E5", // row banding, at the strength it has always been (1.30:1)
 
 
@@ -64,12 +78,6 @@ export const colors = {
   scrimOverlay: "rgba(0,0,0,0.5)", // modal dim
   scrimPanel: "rgba(255,255,255,0.8)", // player transport panel over the tiled background
   scrimStatusBar: "rgba(255,255,255,0.5)", // player status bar strip
-
-  // --- Deferred: MeditationHistory is moving into Settings and will be redesigned there.
-  // These two stripes are only 1.06:1 apart, which is close to no stripe at all without
-  // colour. Left as-is deliberately; fix as part of the move, not before.
-  historyRowA: "#e8f4fd",
-  historyRowB: "#fff9e6",
 } as const;
 
 export default colors;

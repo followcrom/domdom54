@@ -4,11 +4,8 @@ import {
   Text,
   Image,
   StyleSheet,
-  Linking,
   ScrollView,
-  TouchableOpacity,
   ToastAndroid,
-  ActivityIndicator,
   Modal,
   Pressable,
 } from "react-native";
@@ -18,6 +15,7 @@ import { useAudioPlayback } from "./hooks/useAudioPlayback";
 import styles from "./styles/Styles";
 import colors from "./styles/colors";
 import { Body, Card } from "./components/Layout";
+import { ListenButton } from "./components/ListenButton";
 import { Ionicons } from "@expo/vector-icons";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 
@@ -135,25 +133,18 @@ export default function Message() {
         <Image source={imageSource} style={messageStyles.topImage} />
       </Pressable>
       <Card>
-        {title && <Text style={styles.title}>{title}</Text>}
+        {/* `titleBlock` is gone: the card has its own padding now, and this title
+            and Wisdom's are finally the same element with the same geometry. */}
+        {title && <Text style={[styles.title, styles.titleCard]}>{title}</Text>}
         <Body onPress={showId}>{body}</Body>
 
-        {audio && audio !== null && (
-          <View style={messageStyles.audioContainer}>
-            {isLoadingPlayback ? (
-              <ActivityIndicator size="large" color={colors.brand} />
-            ) : (
-              <Ionicons
-                name={isPlaying ? "pause-circle-outline" : "play-circle-outline"}
-                size={48}
-                color={isPlaying ? colors.accentStrong : colors.brand}
-                onPress={togglePlayPause}
-              />
-            )}
-            {audioError && (
-              <Text style={messageStyles.audioError}>{audioError}</Text>
-            )}
-          </View>
+        {audio && (
+          <ListenButton
+            isPlaying={isPlaying}
+            isLoadingPlayback={isLoadingPlayback}
+            audioError={audioError}
+            onToggle={togglePlayPause}
+          />
         )}
       </Card>
 
@@ -211,66 +202,12 @@ const messageStyles = StyleSheet.create({
     left: "50%",
     marginLeft: -20, // Half the icon size to center it
   },
-  audioContainer: {
-    alignItems: "center",
-    marginTop: 10,
-    marginBottom: 10,
-    width: "60%",
-    alignSelf: "center",
-    borderTopWidth: 2,
-    borderBottomWidth: 2,
-    borderStyle: "dashed",
-    borderColor: colors.brand,
-    padding: 5,
-  },
-  audioError: {
-    color: colors.danger,
-    fontSize: 14,
-    textAlign: "center",
-    marginTop: 8,
-  },
+  // 190 matches styles.image, which matches the artwork: 1024x500 is 2.048:1, so at
+  // 390pt wide the true height is 190.4. Push payloads are authored to that ratio,
+  // so this frame crops nothing - worth keeping the two in step if that ever changes.
   topImage: {
     width: "100%",
-    height: 200,
+    height: 190,
     resizeMode: "cover",
   },
-  // button: {
-  //   width: "85%",
-  //   alignSelf: "center",
-  //   backgroundColor: "#007BFF",
-  //   paddingVertical: 16,
-  //   paddingHorizontal: 20,
-  //   borderRadius: 16,
-  //   alignItems: "center",
-  //   marginVertical: 15,
-  //   shadowColor: "#007BFF",
-  //   shadowOffset: {
-  //     width: 0,
-  //     height: 6,
-  //   },
-  //   shadowOpacity: 0.4,
-  //   shadowRadius: 12,
-  //   elevation: 10,
-  //   transform: [{ scale: 1 }],
-  // },
-  // buttonContent: {
-  //   flexDirection: "row",
-  //   alignItems: "center",
-  //   justifyContent: "center",
-  //   minHeight: 24,
-  // },
-  // buttonIcon: {
-  //   marginRight: 12,
-  // },
-  // buttonArrow: {
-  //   marginLeft: 8,
-  //   opacity: 0.8,
-  // },
-  // buttonText: {
-  //   color: "white",
-  //   fontSize: 18,
-  //   fontWeight: "700",
-  //   letterSpacing: 1,
-  //   textTransform: "uppercase",
-  // },
 });

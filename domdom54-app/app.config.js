@@ -11,8 +11,8 @@ export default {
     description:
       "Find peace in the daily chaos with curated wisdom from mindful minds.",
     slug: "domdom52",
-    version: "2.4.0",
-    runtimeVersion: "2.4.0",
+    version: "2.4.1",
+    runtimeVersion: "2.4.1",
     orientation: "default",
     icon: IS_DEV ? "./assets/dev_icon.png" : "./assets/icon.png",
     newArchEnabled: true,
