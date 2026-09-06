@@ -441,7 +441,7 @@ export default function Settings() {
 
             <Card style={settingsStyles.card}>
         <Text style={[settingsStyles.heading, settingsStyles.cardHeading]}>
-          Contact
+          Contact not More
         </Text>
 
         <Row label="Get in touch" onPress={() => navigation.navigate("Contact")} />
