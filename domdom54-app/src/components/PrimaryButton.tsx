@@ -3,10 +3,9 @@ import {
   StyleProp,
   Text,
   TouchableOpacity,
-  View,
   ViewStyle,
 } from "react-native";
-import styles from "../styles/Styles";
+import styles, { BUTTON_ICON_SIZE } from "../styles/Styles";
 import colors from "../styles/colors";
 
 /**
@@ -20,11 +19,13 @@ type PrimaryButtonProps = {
   label: string;
   onPress: () => void;
   /**
-   * Leading icon. Called with the colour the label is using, so the icon dims with
-   * the button. A callback rather than an element because the icons come from two
-   * families (Ionicons and MaterialCommunityIcons).
+   * Leading icon. Called with the colour AND the size the button wants, so neither
+   * can drift per caller - Contact was drawing its icon at 48 while Wisdom drew the
+   * same glyph at 28, which is exactly the kind of thing a shared component should
+   * make impossible. A callback rather than an element because the icons come from
+   * two families (Ionicons and MaterialCommunityIcons).
    */
-  renderIcon: (color: string) => React.ReactNode;
+  renderIcon: (color: string, size: number) => React.ReactNode;
   disabled?: boolean;
   /** Merged onto the container, for one-off spacing. */
   style?: StyleProp<ViewStyle>;
@@ -42,28 +43,33 @@ export function PrimaryButton({
   accessibilityHint,
 }: PrimaryButtonProps) {
   const tint = disabled ? colors.textDisabled : colors.textInverse;
+
+  // The whole control is the TouchableOpacity now. It used to be a View wrapping a
+  // TouchableOpacity that only covered the icon and label, so the button's padding
+  // was not part of its tap target - the corners of a 300pt control did nothing.
   return (
-    <View
+    <TouchableOpacity
       style={[
         styles.buttonContainer,
         disabled && styles.buttonContainerDisabled,
         style,
       ]}
+      onPress={onPress}
+      disabled={disabled}
+      accessibilityRole="button"
+      accessibilityLabel={accessibilityLabel ?? label}
+      accessibilityHint={accessibilityHint}
+      accessibilityState={{ disabled }}
     >
-      <TouchableOpacity
-        style={styles.buttonIcon}
-        onPress={onPress}
-        disabled={disabled}
-        accessibilityRole="button"
-        accessibilityLabel={accessibilityLabel ?? label}
-        accessibilityHint={accessibilityHint}
-        accessibilityState={{ disabled }}
+      {renderIcon(tint, BUTTON_ICON_SIZE)}
+      <Text
+        style={[
+          styles.buttonText,
+          disabled && styles.buttonTextDisabled,
+        ]}
       >
-        {renderIcon(tint)}
-        <Text style={[styles.buttonText, disabled && styles.buttonTextDisabled]}>
-          {label}
-        </Text>
-      </TouchableOpacity>
-    </View>
+        {label}
+      </Text>
+    </TouchableOpacity>
   );
 }

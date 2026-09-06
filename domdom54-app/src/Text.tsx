@@ -14,6 +14,7 @@ import styles from "./styles/Styles";
 import colors from "./styles/colors";
 import { Banner, Body, Card } from "./components/Layout";
 import { PrimaryButton } from "./components/PrimaryButton";
+import { ListenButton } from "./components/ListenButton";
 import { useNavigation } from "@react-navigation/native";
 import { BottomTabNavigationProp } from "@react-navigation/bottom-tabs";
 import type { TabParamList } from "./navigation/Tabs";
@@ -286,26 +287,17 @@ export default function TextPage() {
                 guard, "Please enter a search term." would appear under the
                 previous phrase's title. */}
             {!notice && phrase?.title && (
-              <Text style={styles.title}>{phrase.title}</Text>
+              <Text style={[styles.title, styles.titleCard]}>{phrase.title}</Text>
             )}
             <Body onPress={showId}>{notice ?? phrase?.phrase ?? ""}</Body>
 
             {phrase?.audio && (
-              <View style={styles.audioContainer}>
-                {isLoadingPlayback ? (
-                  <ActivityIndicator size="large" color={colors.brand} />
-                ) : (
-                  <Ionicons
-                    name={isPlaying ? "pause-circle-outline" : "play-circle-outline"}
-                    size={48}
-                    color={isPlaying ? colors.accentStrong : colors.brand}
-                    onPress={togglePlayPause}
-                  />
-                )}
-                {audioError && (
-                  <Text style={styles.audioError}>{audioError}</Text>
-                )}
-              </View>
+              <ListenButton
+                isPlaying={isPlaying}
+                isLoadingPlayback={isLoadingPlayback}
+                audioError={audioError}
+                onToggle={togglePlayPause}
+              />
             )}
           </>
         )}
@@ -314,18 +306,18 @@ export default function TextPage() {
       <PrimaryButton
         label="Generate Wisdom"
         onPress={getRandomPhrase}
-        renderIcon={(color) => (
-          <Ionicons name="bulb-outline" size={48} color={color} />
+        renderIcon={(color, size) => (
+          <Ionicons name="bulb-outline" size={size} color={color} />
         )}
       />
 
       <PrimaryButton
         label="Search"
         onPress={handleSearchPress}
-        renderIcon={(color) => (
+        renderIcon={(color, size) => (
           <MaterialCommunityIcons
             name="comment-search-outline"
-            size={48}
+            size={size}
             color={color}
           />
         )}
@@ -337,18 +329,22 @@ export default function TextPage() {
           navigation.navigate("Discuss", { discussPhrase: phrase?.phrase ?? "" })
         }
         disabled={!phrase || loading}
-        renderIcon={(color) => (
-          <Ionicons name="chatbubbles-sharp" size={48} color={color} />
+        renderIcon={(color, size) => (
+          <Ionicons name="chatbubbles-sharp" size={size} color={color} />
         )}
       />
+
+      {/* The buttons have marginBottom 0 so the stack ends where it ends; this is
+          the gap above the tab bar. */}
+      <View style={{ height: 16 }} />
     </ScrollView>
   );
 }
 
 const wisdomStyles = StyleSheet.create({
   input: {
-    width: "80%",
-    margin: 10,
+    width: "90%",
+    marginTop: 14,
     paddingTop: 12,
     paddingBottom: 12,
     paddingLeft: 12,

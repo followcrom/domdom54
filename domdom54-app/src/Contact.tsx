@@ -147,7 +147,7 @@ export default function Contact({ navigation }: ContactProps) {
   return (
     <KeyboardAvoidingView
       behavior="height"
-      style={{ flex: 1 }}
+      style={contactStyles.container}
       keyboardVerticalOffset={50}
     >
       <ScrollView
@@ -258,8 +258,8 @@ export default function Contact({ navigation }: ContactProps) {
             label={isLoading ? 'Sending...' : 'Send Message'}
             onPress={handleSubmit}
             disabled={isLoading}
-            renderIcon={(color) => (
-              <Ionicons name="chatbubbles-sharp" size={48} color={color} />
+            renderIcon={(color, size) => (
+              <Ionicons name="chatbubbles-sharp" size={size} color={color} />
             )}
             accessibilityLabel="Send your message"
             accessibilityHint="Sends the message to our support team"
@@ -271,9 +271,20 @@ export default function Contact({ navigation }: ContactProps) {
 }
 
 const contactStyles = StyleSheet.create({
+  // The screen's own background. This style existed before and was never applied to
+  // anything - the root carried an inline { flex: 1 } - so Contact's colour came from
+  // the navigation theme and this `backgroundColor` did nothing at all.
+  //
+  // White rather than the page tint. Contact is a form - a column of bordered fields
+  // and nothing else - and the tint gives it a colour cast it has no use for.
+  //
+  // `card`, not a new background token: the palette does not grow for this. The
+  // trade-off is that the fields no longer sit ON a surface, they ARE the surface,
+  // so they rely entirely on `border` to identify themselves - which is exactly the
+  // job that token is published for, at 3.56:1 on white.
   container: {
     flex: 1,
-    backgroundColor: colors.page,
+    backgroundColor: colors.card,
   },
   scrollContent: {
     flexGrow: 1,
