@@ -36,10 +36,14 @@ import {
 // This screen holds three things and deliberately nothing else: the one preference
 // the app actually has (notifications), your own past activity (meditation history),
 // and the facts you'd need to support the app (version, contact, privacy). It used
-// to be the overflow drawer for anything that didn't fit elsewhere - a Home link, a
-// "Useful Links" heading, the message viewer. The rule now is: something you
+// to be the overflow drawer for anything that didn't fit elsewhere - a "Useful
+// Links" heading, the message viewer. The rule now is: something you
 // configure goes in the first card, something you did goes in the next, something
-// about the app goes after that, and anything else isn't a setting.
+// about the app goes after that, and anything else isn't a setting. The Home
+// link at the top is the one exception, and it's deliberately OUTSIDE those
+// three cards rather than filed under About: it's navigation, not a fact about
+// the app. It's here at all because Home is the initial route with no tab of
+// its own, so it's the one destination the tab bar can't reach.
 
 // The OS-level permission (can only be granted/revoked by the user, via the
 // native prompt once or via system settings after that) and the app's own
@@ -365,6 +369,9 @@ export default function Settings() {
 
   return (
     <ScrollView contentContainerStyle={styles.container}>
+      {/* Headingless on purpose. A heading would name a category, and this card
+          is one destination, not a group of related settings. */}
+
       <Card style={settingsStyles.card}>
         <Text style={[settingsStyles.heading, settingsStyles.cardHeading]}>
           Account
