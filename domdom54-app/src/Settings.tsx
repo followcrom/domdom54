@@ -467,19 +467,7 @@ export default function Settings() {
         <Row
           label="Privacy & data"
           onPress={() => Linking.openURL(PRIVACY_URL)}
-          last
-        />
-      </Card>
-
-      <Card style={settingsStyles.card}>
-        <Text style={[settingsStyles.heading, settingsStyles.cardHeading]}>
-          More
-        </Text>
-
-        <Row label="Contact us" onPress={() => navigation.navigate("Contact")} />
-        <Row
-          label="followCrom"
-          onPress={() => Linking.openURL(FOLLOWCROM_URL)}
+          external
           last
         />
       </Card>
@@ -491,6 +479,7 @@ const settingsStyles = StyleSheet.create({
   card: {
     paddingHorizontal: 16,
     paddingVertical: 12,
+    marginBottom: 16,
   },
   heading: {
     fontSize: 24,

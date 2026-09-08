@@ -42,6 +42,8 @@ type APIError = {
 // --- Constants ---
 const MAX_CONVERSATION_LENGTH = 20;
 const REQUEST_TIMEOUT = 30000;
+// The Lambda behind this URL relays to DeepSeek, which the privacy policy names
+// explicitly (docs/privacy-policy.html) - change the provider and that page must change too.
 const DISCUSS_API_URL =
   "https://qoynswb93m.execute-api.eu-west-2.amazonaws.com/prod/discuss";
 
