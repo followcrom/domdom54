@@ -167,7 +167,8 @@
         <li>We never collect advertising IDs, GPS location, contacts, photos or files. The app has no
           microphone access.</li>
         <li>Your meditation history stays on your phone.</li>
-        <li>We only receive anything if you turn on notifications or write to us.</li>
+        <li>We only receive anything if you turn on notifications or write to us. The app
+          also checks for updates each time it starts.</li>
         <li>Please note that the Discuss feature is provided by a third party and is subject to their privacy
           policy.</li>
       </ul>
@@ -196,13 +197,18 @@
             </tr>
             <tr>
               <td><strong>Notifications</strong></td>
-              <td>push token, app version, your phone's language region</td>
-              <td>Stored until you switch notifications off or uninstall</td>
+              <td>push token, app version, Android version, your phone's language region</td>
+              <td>Stored in a private Google Sheet until you switch notifications off or uninstall</td>
             </tr>
             <tr>
               <td><strong>Discuss</strong></td>
               <td>messages sent to DeepSeek to generate replies</td>
               <td>Not stored by us or on your phone. See the warning below</td>
+            </tr>
+            <tr>
+              <td><strong>App updates</strong></td>
+              <td>app version, platform, IP address</td>
+              <td>Held in Expo's server logs, not by us</td>
             </tr>
             <tr>
               <td><strong>Contact form</strong></td>
@@ -213,7 +219,9 @@
         </table>
       </div>
 
-      <p>The app runs on Amazon Web Services in London; Google and Expo deliver the notifications.</p>
+      <p>The app itself runs on Amazon Web Services in London. Push tokens are kept in a private
+        Google Sheet rather than on AWS; Google and Expo deliver the notifications, and Expo also
+        serves the app updates.</p>
 
 
 
@@ -223,9 +231,24 @@
           servers <strong>in China</strong>; a country without a UK adequacy
           decision. DeepSeek may retain your messages and use them to train its models. You can review <a
             href="https://cdn.deepseek.com/policies/en-US/deepseek-privacy-policy.html">DeepSeek's privacy policy</a>.
-          Every other part of the app works without
-          the Discuss feature.</p>
+          Typing into Discuss is how you
+          consent to that transfer (UK GDPR Article 49(1)(a)), and every other part of the app works
+          without the Discuss feature.</p>
       </div>
+
+
+      <h2>Why we can handle it</h2>
+      <p>Our lawful bases under UK GDPR:</p>
+      <ul>
+        <li><strong>Notifications</strong> &ndash; your consent. Switch the toggle off in Settings to
+          withdraw it.</li>
+        <li><strong>Discuss</strong> &ndash; your explicit consent, including to the transfer described
+          above. Not using Discuss withholds it.</li>
+        <li><strong>Contact form</strong> &ndash; our legitimate interest in answering your enquiry.</li>
+        <li><strong>App updates</strong> &ndash; our legitimate interest in keeping the app working and
+          secure.</li>
+        <li><strong>Meditation history</strong> &ndash; no basis is needed: it never leaves your phone.</li>
+      </ul>
 
 
       <h2>Your rights</h2>

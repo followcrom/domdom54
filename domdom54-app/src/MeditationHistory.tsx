@@ -9,6 +9,7 @@ import {
   Share,
 } from "react-native";
 import { Ionicons } from "@expo/vector-icons";
+import { useSafeAreaInsets } from "react-native-safe-area-context";
 import styles from "./styles/Styles";
 import colors from "./styles/colors";
 import { Body } from "./components/Layout";
@@ -28,7 +29,14 @@ type Props = {
 // Row banding matches the rest of the app's lists (alt/card, 1.30:1).
 const ROW_COLORS = [colors.alt, colors.card];
 
+// The resting gap under the last row, before the device's own inset is added to it.
+const CONTENT_BOTTOM_PAD = 10;
+
 export default function MeditationHistory({ visible, onClose }: Props) {
+  // The sheet is anchored to the bottom of the screen, so its own bottom edge sits
+  // under the system navigation/gesture bar. Without this the last entry scrolls to
+  // its end behind that bar, taking its delete button with it.
+  const insets = useSafeAreaInsets();
   const [meditationLog, setMeditationLog] = useState<MeditationLogEntry[]>([]);
 
   const refresh = async () => {
@@ -89,7 +97,12 @@ export default function MeditationHistory({ visible, onClose }: Props) {
               </TouchableOpacity>
             </View>
           </View>
-          <ScrollView contentContainerStyle={localStyles.scrollContent}>
+          <ScrollView
+            contentContainerStyle={[
+              localStyles.scrollContent,
+              { paddingBottom: CONTENT_BOTTOM_PAD + insets.bottom },
+            ]}
+          >
             {meditationLog.length === 0 ? (
               <Body>No history yet.</Body>
             ) : (
@@ -164,9 +177,9 @@ const localStyles = StyleSheet.create({
   closeButton: {
     padding: 4,
   },
+  // paddingBottom is applied at the call site, where the safe-area inset is known.
   scrollContent: {
     paddingHorizontal: 12,
-    paddingBottom: 10,
   },
   row: {
     paddingVertical: 10,

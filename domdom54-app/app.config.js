@@ -11,6 +11,7 @@ export default {
     description:
       "Find peace in the daily chaos with curated wisdom from mindful minds.",
     slug: "domdom52",
+    platforms: ["android"],
     version: "2.4.1",
     runtimeVersion: "2.4.1",
     orientation: "default",

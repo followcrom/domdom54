@@ -115,9 +115,9 @@ export default StyleSheet.create({
   cardPad: {
     marginTop: 14,
     marginBottom: 0,
-    paddingHorizontal: 20,
-    paddingTop: 20,
-    paddingBottom: 22,
+    paddingHorizontal: 16,
+    paddingTop: 14,
+    paddingBottom: 16,
   },
   // Landscape narrows the column; it comes after contentWidth in the array.
   textContainerLandscape: {
@@ -224,12 +224,23 @@ export default StyleSheet.create({
     paddingBottom: 20,
   },
 
+  // `divider` rather than `brandSurface`, which is what this was between b0d01f5 and
+  // now. brandSurface is a near-white blue tint: against `card` and against `alt` it is
+  // invisible, so the rows had no rule at all and the 1.30:1 banding was carrying the
+  // whole list on its own. divider is the token the palette names for this exact job.
   listItem: {
     paddingVertical: LIST_ITEM_VERTICAL_PADDING,
     borderBottomWidth: LIST_ITEM_BORDER_WIDTH,
-    borderBottomColor: colors.brandSurface,
+    borderBottomColor: colors.divider,
   },
 
+  // fontSize and lineHeight are load-bearing: LIST_ITEM_HEIGHT is derived from them and
+  // feeds Meditations' getItemLayout, so changing either here misplaces scroll offsets
+  // without any visible breakage.
+  //
+  // No fontWeight: the default is what a resting row wants. 500 was tried and read as
+  // too heavy down a full list - the row rule below is what gives the list structure,
+  // not the type. Moments steps its own playing row up to 600.
   listItemText: {
     textAlign: "center",
     color: colors.textPrimary,

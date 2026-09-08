@@ -25,6 +25,7 @@ import { useNavigation, useFocusEffect } from "@react-navigation/native";
 import { StackNavigationProp } from "@react-navigation/stack";
 import type { RootStackParamList } from "../App";
 import MeditationHistory from "./MeditationHistory";
+import PrivacyPolicy from "./PrivacyPolicy";
 import {
   EMPTY_TOTALS,
   formatMinutes,
@@ -61,11 +62,11 @@ type SettingsNavigationProp = StackNavigationProp<RootStackParamList>;
 const SUBSCRIBED_KEY = "pushSubscribed";
 
 // Play's own data-safety listing, which shows what the app declares it collects.
-// A stand-in until followcrom.com carries a current privacy policy - the existing
-// one is three years stale, and a link to a stale policy is worse than a link to
-// the live declaration. Hardcoded to the PRODUCTION package: dev builds use
-// com.followcrom.domdom.dev, which has no Play listing of its own.
-const PRIVACY_URL =
+// It is a companion to the policy, not a substitute for it: the policy itself now
+// opens in-app (PrivacyPolicy), so the user never leaves to read it. Hardcoded to
+// the PRODUCTION package: dev builds use com.followcrom.domdom.dev, which has no
+// Play listing of its own.
+const DATA_SAFETY_URL =
   "https://play.google.com/store/apps/datasafety?id=com.followcrom.domdom";
 
 const FOLLOWCROM_URL = "https://followcrom.com";
@@ -168,6 +169,7 @@ export default function Settings() {
   const [busy, setBusy] = useState(false);
   const [checkingUpdate, setCheckingUpdate] = useState(false);
   const [showHistory, setShowHistory] = useState(false);
+  const [showPrivacy, setShowPrivacy] = useState(false);
   const [totals, setTotals] = useState(EMPTY_TOTALS);
 
   const refreshTotals = useCallback(async () => {
@@ -374,8 +376,7 @@ export default function Settings() {
         <Row label="All time" value={formatMinutes(totals.allTime)} last />
 
         <Text style={settingsStyles.statusLine}>
-          Your meditation history is stored only on this device. It is never sent to
-          the server or shared with anyone.
+          Your meditation history is only ever stored on this device. It is never shared with anyone.
         </Text>
       </Card>
 
@@ -465,21 +466,28 @@ export default function Settings() {
           busy={checkingUpdate}
         />
         <Row
-          label="Privacy & data"
-          onPress={() => Linking.openURL(PRIVACY_URL)}
-          external
+          label="Privacy policy"
+          onPress={() => setShowPrivacy(true)}
           last
         />
       </Card>
+
+      <PrivacyPolicy visible={showPrivacy} onClose={() => setShowPrivacy(false)} />
+
+      {/* The cards' spacing is all top margin, so the stack ends where it ends;
+          this is the gap above the tab bar. */}
+      <View style={{ height: 16 }} />
     </ScrollView>
   );
 }
 
 const settingsStyles = StyleSheet.create({
+  // No marginBottom: `cardPad` already puts 14 above every card, and a bottom
+  // margin here stacked on top of it, so consecutive cards sat 30 apart. The
+  // padding stays overridden - settings rows want to be denser than a phrase card.
   card: {
     paddingHorizontal: 16,
     paddingVertical: 12,
-    marginBottom: 16,
   },
   heading: {
     fontSize: 24,

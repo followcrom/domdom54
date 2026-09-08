@@ -316,17 +316,17 @@ export default function Discuss() {
       >
         <Banner />
 
-        <Card>
+        <Card style={discussPageStyles.conversationCard}>
           {/* The bubbles always render, and the spinner always sits under them.
               There used to be two spinners behind a length check - a large one that
               replaced the conversation entirely while it was empty, and a small one
               underneath once it was not. Since the user's turn now goes up before
               the request, the first case only ever meant "blank screen". */}
-          <View style={{ paddingHorizontal: 10 }}>
-            {conversationHistory.map((msg, index) => (
-              <MessageBubble key={`${msg.timestamp}-${index}`} message={msg} />
-            ))}
-          </View>
+          {/* No wrapper gutter here: `cardPad` already owns the card's interior,
+              and a second paddingHorizontal on top of it inset the bubbles twice. */}
+          {conversationHistory.map((msg, index) => (
+            <MessageBubble key={`${msg.timestamp}-${index}`} message={msg} />
+          ))}
 
           {loading && (
             <View style={discussPageStyles.loadingContainer}>
@@ -405,10 +405,19 @@ const discussPageStyles = StyleSheet.create({
   // styles.surface and styles.contentWidth, so only what differs lives here -
   // radius 26 is half the row's height, which is what makes it read as a single
   // control rather than a panel.
+  // The first and last bubble bring their own marginVertical, so the card's shared
+  // vertical padding lands on top of it and the conversation floats. Trimmed here
+  // rather than in `cardPad`, which every other screen's card relies on.
+  conversationCard: {
+    paddingTop: 6,
+    paddingBottom: 8,
+  },
   composer: {
     flexDirection: "row",
     alignItems: "center",
     marginTop: 14,
+    // The page's last element: without this it sits flush against the tab bar.
+    marginBottom: 16,
     paddingLeft: 16,
     paddingRight: 8,
     paddingVertical: 8,

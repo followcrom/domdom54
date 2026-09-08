@@ -42,8 +42,9 @@ export function useAudioPlayback(audioUrl: string | null): AudioPlayback {
     }
   }, []);
 
-  // Load the source when the URL changes, without auto-playing. Reset any
-  // transient play/error state left over from a previous clip.
+  // Load the source when the URL changes, without auto-playing - and stop
+  // playback when it changes to null. Either way, reset any transient
+  // play/error state left over from a previous clip.
   useEffect(() => {
     clearTimer();
     setWantsToPlay(false);
@@ -51,6 +52,16 @@ export function useAudioPlayback(audioUrl: string | null): AudioPlayback {
     if (audioUrl) {
       player.replace(audioUrl);
       player.pause();
+    } else {
+      // No source means nothing should be playing: a phrase that carries no
+      // audio (search results) also hides the pause control, so leaving the
+      // previous clip running would strand the user with unstoppable audio.
+      try {
+        player.pause();
+        player.seekTo(0);
+      } catch {
+        // Player already released (unmount in progress) - nothing to stop.
+      }
     }
   }, [audioUrl, player, clearTimer]);
 

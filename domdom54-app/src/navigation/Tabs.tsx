@@ -218,8 +218,8 @@ export default function BottomTabs() {
                 Moments
               </Text>
               <MaterialCommunityIcons 
-                name="meteor" 
-                size={40} 
+                name="auto-fix" 
+                size={34} 
                 color={colors.brandStrong} 
               />
             </View>

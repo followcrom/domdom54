@@ -85,12 +85,17 @@ export default function Moments() {
     }
   }, [player, status?.isLoaded, currentIndex]);
 
-  // Seek to start when audio finishes so pressing play restarts it
+  // A finished track is a stopped track, not a paused one - clearing currentIndex is what
+  // returns the row to plain banding. Without it the row keeps its orange fill and, since
+  // the player reports loaded-and-not-playing, shows the paused mark, which claims the
+  // track is waiting to be resumed when it has actually run out. Same end state as
+  // stopSound, plus the seek, so play/stop/finish all leave the screen at rest.
   useEffect(() => {
     if (status?.didJustFinish) {
       shouldAutoPlay.current = false;
       player.seekTo(0);
       player.pause();
+      setCurrentIndex(null);
     }
   }, [status?.didJustFinish, player]);
 
@@ -194,12 +199,19 @@ useEffect(() => {
       {/* The list gives blue up entirely so the transport row can have it back. A track
           name is content, not a link, so it is ink; the row that is playing is state, so
           it is orange. Neither colour is doing two jobs.
+          The orange fill says "this is the loaded track" and survives a pause - pausing
+          should not lose your place in the list. Play vs paused is left to the mark, so
+          the fill does not repaint on the most-tapped gesture on the screen.
           The alt/card banding stays. It is only 1.30:1, which did nothing while the labels
           were dark blue and fighting it for attention - against ink on white it is enough
           to walk the eye down the list, which is all it is being asked to do. */}
       <ScrollView contentContainerStyle={styles.listContainer}>
         {audioFiles.map((item, index) => {
           const isCurrent = index === currentIndex;
+          // `isLoaded` is the guard, not decoration: selecting a new track sets
+          // currentIndex synchronously but player.replace() resolves a few frames later,
+          // so without it every new selection flashes the paused mark before it plays.
+          const isPaused = isCurrent && status?.isLoaded && !isPlaying;
           return (
             <TouchableOpacity
               key={index.toString()}
@@ -217,7 +229,11 @@ useEffect(() => {
             >
               {isCurrent && (
                 <View style={speechPageStyles.nowPlayingMark}>
-                  <Ionicons name="stats-chart" size={16} color={colors.textInverse} />
+                  <Ionicons
+                    name={isPaused ? "pause" : "stats-chart"}
+                    size={16}
+                    color={colors.textInverse}
+                  />
                 </View>
               )}
               <Text
@@ -251,6 +267,10 @@ const speechPageStyles = StyleSheet.create({
   // Stretched top-to-bottom and centred with flex rather than offset from a 50% top: the
   // icon renders as Text, whose line box is taller than its size, so a half-size negative
   // margin under-corrects and leaves the glyph sitting high.
+  // Carries the play/paused split on its own: "stats-chart" for levels moving, "pause"
+  // for levels stopped. Solid rather than "pause-outline" - the outline's stroke is too
+  // thin to hold up at 16px in white on the orange row. Both glyphs sit inside the same
+  // row, so the mark is the only thing that changes when playback is toggled.
   nowPlayingMark: {
     position: "absolute",
     left: 22,
