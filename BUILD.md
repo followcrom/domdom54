@@ -23,7 +23,22 @@ package (`com.followcrom.domdom.dev`) even when you're about to build
 production. To see what production will actually produce:
 
 ```powershell
+# Windows PowerShell syntax:
 $env:APP_VARIANT='production'; npx expo config
+```
+
+```bash
+# WSL syntax:
+APP_VARIANT=production npx expo config
+```
+
+**NOTE**: APP_VARIANT='production' does not persist in the shell, so it won't affect your local dev work. Safest is to scope it and clean up:
+
+```powershell
+# Windows PowerShell syntax:
+$env:APP_VARIANT='production'
+npx expo config --type introspect --json | ConvertFrom-Json | % { $_.android }
+Remove-Item Env:\APP_VARIANT
 ```
 
 Any value other than `"development"` makes `IS_DEV` false, and because the
