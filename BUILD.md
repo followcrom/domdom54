@@ -110,6 +110,10 @@ If the app was submitted successfully, a new release will be created on the Goog
 Initially the release only goes to whichever track `submit.production.android.track` names in
 `eas.json` (currently `internal`) - it is not live to the public yet.
 
+Production releases go through Google's review before going live;
+internal-track releases don't, which is why internal is the fast loop for verifying a build
+before it's public.
+
 ### ⬆️ Promoting the release to Production
 
 Once the internal-track build has been verified, promote that **same AAB** to
@@ -123,10 +127,6 @@ Production.
 4. Choose a rollout: full (100%) or staged.
 5. Save release draft and follow prompt to Publishing overview. Some checks seem to run.
 6. Submit 1 change for review. You don't need to wait for the checks to finish to be able to send your changes for review. You can send changes at any time, and we'll finish these checks before sending your changes to be reviewed.
-
-Production releases go through Google's review before going live;
-internal-track releases don't, which is why internal is the fast loop for verifying a build
-before it's public.
 
 <br>
 
