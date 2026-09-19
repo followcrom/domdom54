@@ -189,7 +189,7 @@ Update the production app via EAS Update. This lets you push JS/asset changes to
 ## Production update
 
 ```bash
-eas update --branch production --environment production --platform android --message "OTA update - Version: 2.4.2, Runtime: 2.4.1"
+eas update --branch production --environment production --platform android --message "OTA update - Version: 2.4.3, Runtime: 2.4.1"
 ```
 
 🔴 **`--environment production` is not optional.** `eas update` bundles the JS
@@ -221,11 +221,11 @@ preview to the `development` environment, and without the flag the bundle takes 
 Each build only fetches updates from its own channel (set per profile in `eas.json`),
 so one publish never reaches both apps:
 
-| Build | Channel | Receives |
-| --- | --- | --- |
-| Play Store app (`production` profile) | `production` | `eas update --branch production ...` |
-| RanDEV WisDEV `preview` APK | `preview` | `eas update --branch preview ...` |
-| RanDEV WisDEV `development` APK | `development` | Nothing in practice - it loads JS from Metro |
+| Build                                 | Channel       | Receives                                     |
+| ------------------------------------- | ------------- | -------------------------------------------- |
+| Play Store app (`production` profile) | `production`  | `eas update --branch production ...`         |
+| RanDEV WisDEV `preview` APK           | `preview`     | `eas update --branch preview ...`            |
+| RanDEV WisDEV `development` APK       | `development` | Nothing in practice - it loads JS from Metro |
 
 An update is applied on the **next** launch after it downloads: open the app, close it
 fully, reopen it. Settings > Version should then show the new `version`.
