@@ -174,15 +174,14 @@ export default function Contact({ navigation }: ContactProps) {
         <View style={contactStyles.formContainer}>
           <Text style={[styles.title, contactStyles.title]}>Contact Us</Text>
           <Text style={[styles.secondaryText, contactStyles.subtitle]}>
-            We'd love to hear from you. Send us a message and we'll respond as soon as possible.
+            We'd love to hear from you. Send us a message and we aim to reply within 48 hours.
           </Text>
 
           {submissionSuccess && (
             <View style={contactStyles.successBanner}>
               <Text style={contactStyles.successBannerText}>
                 🎉 Message sent! We'll reply to{' '}
-                <Text style={contactStyles.successEmail}>{sentEmail}</Text>
-                {' '}as soon as we can.
+                <Text style={contactStyles.successEmail}>{sentEmail}</Text>.
               </Text>
               <TouchableOpacity
                 style={contactStyles.successButton}
@@ -249,7 +248,7 @@ export default function Contact({ navigation }: ContactProps) {
               ]}
               value={formData.message}
               onChangeText={(value) => handleInputChange('message', value)}
-              placeholder="Tell us what's on your mind..."
+              placeholder="What is it my love?"
               placeholderTextColor={colors.textSecondary}
               multiline
               numberOfLines={6}

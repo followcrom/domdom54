@@ -12,8 +12,6 @@
 
 ### Pull latest from origin
 
-This fetches the newest commits from the remote branch origin/main and merges them into whatever branch you currently have checked out.
-
 ```bash
 git pull origin main
 ```

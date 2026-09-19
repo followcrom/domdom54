@@ -328,12 +328,14 @@ export default function Settings() {
   })();
 
   const appVersion = Constants.expoConfig?.version ?? "unknown";
-  // Updates.channel is "" in a dev client. When present it tells a tester which
-  // channel their build follows (preview vs production), which is exactly the
-  // thing that's otherwise impossible to determine from inside the app.
-  const versionLabel = Updates.channel
-    ? `${appVersion} (${Updates.channel})`
-    : appVersion;
+  // Updates.channel is "" in a dev client. On a test build it tells the tester which
+  // channel the build follows (e.g. "preview"), which is otherwise impossible to
+  // determine from inside the app. Hidden on "production": store users only need
+  // the version number, and the channel name reads as debug text to them.
+  const versionLabel =
+    Updates.channel && Updates.channel !== "production"
+      ? `${appVersion} (${Updates.channel})`
+      : appVersion;
 
   const checkForUpdates = async () => {
     // checkForUpdateAsync THROWS in a dev client rather than returning a result,
