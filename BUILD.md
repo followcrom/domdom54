@@ -50,7 +50,7 @@ Confirm the output shows `com.followcrom.domdom`, `RanDOM WisDOM`, and scheme
 
 **Bump `versionCode`** in `app.config.js` if the current value was already uploaded to Play Console.
 
-Bump `version` (and usually `runtimeVersion`) for a user-facing release.
+Bump `version` (and usually `runtimeVersion`) for a user-facing store release. For an OTA-only release, bump `version` but leave `runtimeVersion` alone - see [Versioning](#versioning) under OTA Updates.
 
 <br>
 
@@ -189,7 +189,7 @@ Update the production app via EAS Update. This lets you push JS/asset changes to
 ## Production update
 
 ```bash
-eas update --branch production --environment production --message "OTA update - Version: 2.1.1, Runtime: 2.1.0" --platform android
+eas update --branch production --environment production --platform android --message "OTA update - Version: 2.4.2, Runtime: 2.4.1"
 ```
 
 🔴 **`--environment production` is not optional.** `eas update` bundles the JS
@@ -206,10 +206,38 @@ so adopting it now costs nothing.
 
 ## Preview update
 
-you can publish an EAS Update to the preview channel and the app already on your device will fetch it — no reinstall required:
+You can publish an EAS Update to the preview channel and the preview build already on your device will fetch it — no reinstall required:
 
 ```bash
-eas update --branch preview --message "Rework Permission screen: separate OS permission from message subscription"
+eas update --branch preview --environment development --platform android --message "OTA update - Version: 2.4.2, Runtime: 2.4.1"
+```
+
+`--environment development` matters here for the same reason as above: `eas.json` maps
+preview to the `development` environment, and without the flag the bundle takes its
+`EXPO_PUBLIC_*` values from your local `.env` instead of EAS.
+
+## Channels
+
+Each build only fetches updates from its own channel (set per profile in `eas.json`),
+so one publish never reaches both apps:
+
+| Build | Channel | Receives |
+| --- | --- | --- |
+| Play Store app (`production` profile) | `production` | `eas update --branch production ...` |
+| RanDEV WisDEV `preview` APK | `preview` | `eas update --branch preview ...` |
+| RanDEV WisDEV `development` APK | `development` | Nothing in practice - it loads JS from Metro |
+
+An update is applied on the **next** launch after it downloads: open the app, close it
+fully, reopen it. Settings > Version should then show the new `version`.
+
+## Rollback
+
+A bad OTA can be undone in a minute, because the previous update is still valid for the
+same runtime:
+
+```bash
+eas update:list --branch production          # find the group ID of the last good update
+eas update:republish --group <group-id>      # publish it again as the latest
 ```
 
 ## Versioning
