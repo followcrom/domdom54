@@ -12,7 +12,7 @@ export default {
       "Find peace in the daily chaos with curated wisdom from mindful minds.",
     slug: "domdom52",
     platforms: ["android"],
-    version: "2.4.1",
+    version: "2.4.2",
     runtimeVersion: "2.4.1",
     orientation: "default",
     icon: IS_DEV ? "./assets/dev_icon.png" : "./assets/icon.png",

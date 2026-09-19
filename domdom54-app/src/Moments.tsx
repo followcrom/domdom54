@@ -8,7 +8,7 @@ import {
 } from "react-native";
 import { Ionicons } from "@expo/vector-icons";
 import { useAudioPlayer, useAudioPlayerStatus, setAudioModeAsync } from "expo-audio";
-import styles from "./styles/Styles";
+import styles, { bandColor } from "./styles/Styles";
 import colors from "./styles/colors";
 import { useNavigation } from "@react-navigation/native";
 
@@ -220,9 +220,7 @@ useEffect(() => {
                 {
                   backgroundColor: isCurrent
                     ? colors.accentStrong
-                    : index % 2 === 0
-                    ? colors.alt
-                    : colors.card,
+                    : bandColor(index),
                 },
               ]}
               onPress={() => playAudio(index)}

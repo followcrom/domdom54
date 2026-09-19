@@ -231,7 +231,7 @@ export default function TextPage() {
       {searchOpen && (
         <TextInput
           ref={inputRef}
-          style={[styles.input, wisdomStyles.input]}
+          style={[styles.input, styles.contentWidth, wisdomStyles.input]}
           value={query}
           accessibilityLabel="Search input field"
           onChangeText={setQuery}
@@ -246,7 +246,7 @@ export default function TextPage() {
 
       {hasResults && (
         <>
-          <Text style={wisdomStyles.resultsTopline}>
+          <Text style={[styles.heading, wisdomStyles.resultsTopline]}>
             Results for:{" "}
             <Text style={wisdomStyles.resultsTerm}>{lastQuery}</Text>
           </Text>
@@ -278,7 +278,7 @@ export default function TextPage() {
 
       <Card>
         {loading ? (
-          <View style={{ padding: 10 }}>
+          <View style={wisdomStyles.loading}>
             <ActivityIndicator size="large" color={colors.brand} />
           </View>
         ) : (
@@ -333,31 +333,29 @@ export default function TextPage() {
           <Ionicons name="chatbubbles-sharp" size={size} color={color} />
         )}
       />
-
-      {/* The buttons have marginBottom 0 so the stack ends where it ends; this is
-          the gap above the tab bar. */}
-      <View style={{ height: 16 }} />
     </ScrollView>
   );
 }
 
 const wisdomStyles = StyleSheet.create({
+  // Width from `contentWidth`, so the field lines up with the card under it.
   input: {
-    width: "90%",
     marginTop: 14,
     paddingTop: 12,
     paddingBottom: 12,
     paddingLeft: 12,
   },
+  // Size and colour from `styles.heading`; regular weight so the term stands out.
   resultsTopline: {
-    fontSize: 24,
-    color: colors.brandStrong,
     textAlign: "center",
     marginVertical: 10,
   },
   resultsTerm: {
     fontStyle: "italic",
     fontWeight: "bold",
+  },
+  loading: {
+    padding: 10,
   },
   resultCount: {
     fontSize: 15,

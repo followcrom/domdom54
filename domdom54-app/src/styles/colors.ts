@@ -28,7 +28,7 @@ export const colors = {
   // that is why the playing transport icon uses accentStrong, not accent.
   accent: "#E8591C", // 3.57 / 3.19 - active tab icon and underline, and nothing else
   accentStrong: "#BF4205", // 5.25 / 4.69 - active tab label, readouts, pause-while-playing
-  accentSurface: "#FFF1EC", // tint - unused today
+  accentSurface: "#FFF1EC", // tint - the privacy policy's warning callout
 
   // --- Green: confirmation only. Never a play button.
   success: "#007C4C", // 5.27 / 4.70

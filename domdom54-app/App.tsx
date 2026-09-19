@@ -247,6 +247,12 @@ export default function App() {
               headerShown: false,
               presentation: 'modal',
               gestureEnabled: true,
+              // White, to match Contact's own background. The screen's
+              // KeyboardAvoidingView shrinks when the keyboard opens and on Android
+              // does not always grow back when it closes, so whatever sits behind it
+              // shows through as a band at the bottom. By default that is the theme's
+              // `page` blue; with this it is the same white as the form.
+              cardStyle: { backgroundColor: colors.card },
             }}
           />
         </Stack.Navigator>

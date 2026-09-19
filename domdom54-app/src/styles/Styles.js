@@ -33,12 +33,52 @@ export const TOP_BAR_HEIGHT = 68; // 10 padding + 48 icon + 10 padding
  */
 export const BUTTON_ICON_SIZE = 28;
 
+/**
+ * The gap between the last thing on a screen and the tab bar. Applied once, on
+ * `container` and `listContainer`, so no screen needs a trailing spacer of its own.
+ * Every scrolling screen used to end differently - inline 16pt spacers on Wisdom and
+ * Settings, the composer's margin on Discuss, 20 on the lists, nothing on Messages.
+ */
+export const SCREEN_BOTTOM_GAP = 16;
+
+/**
+ * Corner radii. Only the steps that recur; one-off radii that are derived from a
+ * control's own size (the composer's 26, the send button's 22) stay where they are.
+ */
+export const radius = {
+  sm: 6, // small inline surfaces - callouts, the success banner's button
+  md: 8, // fields and bordered panels
+  lg: 14, // cards and primary buttons
+  sheet: 20, // the top corners of a bottom sheet
+};
+
+/**
+ * Row banding for every list: `alt` on even rows, `card` on odd. Meditations,
+ * Moments and Meditation History each had their own copy of this ternary.
+ */
+export function bandColor(index) {
+  return index % 2 === 0 ? colors.alt : colors.card;
+}
+
+// A 1px rule under a row. Shared by the list rows, the Settings rows and the privacy
+// policy's data table - spread into `listItem` below, and published as `ruledRow`.
+const RULE = {
+  borderBottomWidth: LIST_ITEM_BORDER_WIDTH,
+  borderBottomColor: colors.divider,
+};
+
+const ERROR_TEXT = {
+  color: colors.danger,
+  fontSize: 14,
+};
+
 export default StyleSheet.create({
   container: {
     flexGrow: 1,
     backgroundColor: colors.page,
     justifyContent: "flex-start",
     alignItems: "center",
+    paddingBottom: SCREEN_BOTTOM_GAP,
   },
 
   // Unchanged. Contact and MeditationHistory both use this and Contact does not
@@ -95,7 +135,7 @@ export default StyleSheet.create({
   // here, and the page moved to a tint that puts it at 1.16:1.
   surface: {
     backgroundColor: colors.card,
-    borderRadius: 14,
+    borderRadius: radius.lg,
     shadowColor: colors.shadow,
     shadowOffset: { width: 0, height: 2 },
     shadowOpacity: 0.1,
@@ -168,7 +208,7 @@ export default StyleSheet.create({
     backgroundColor: colors.brandStrong,
     borderColor: colors.brandStrong,
     borderWidth: 1.5,
-    borderRadius: 14,
+    borderRadius: radius.lg,
     paddingVertical: 13,
     paddingHorizontal: 12,
     alignSelf: "center",
@@ -208,7 +248,7 @@ export default StyleSheet.create({
   input: {
     borderWidth: 1,
     borderColor: colors.border,
-    borderRadius: 8,
+    borderRadius: radius.md,
     backgroundColor: colors.card,
     color: colors.textPrimary,
     fontSize: 16,
@@ -221,7 +261,7 @@ export default StyleSheet.create({
 
   listContainer: {
     paddingHorizontal: 0,
-    paddingBottom: 20,
+    paddingBottom: SCREEN_BOTTOM_GAP,
   },
 
   // `divider` rather than `brandSurface`, which is what this was between b0d01f5 and
@@ -229,9 +269,16 @@ export default StyleSheet.create({
   // invisible, so the rows had no rule at all and the 1.30:1 banding was carrying the
   // whole list on its own. divider is the token the palette names for this exact job.
   listItem: {
+    ...RULE,
     paddingVertical: LIST_ITEM_VERTICAL_PADDING,
-    borderBottomWidth: LIST_ITEM_BORDER_WIDTH,
-    borderBottomColor: colors.divider,
+  },
+
+  // The same rule for rows that are not list items - Settings, the privacy policy's
+  // data table, Meditation History. `ruledRowLast` drops it where a card's own edge
+  // already closes the block.
+  ruledRow: RULE,
+  ruledRowLast: {
+    borderBottomWidth: 0,
   },
 
   // fontSize and lineHeight are load-bearing: LIST_ITEM_HEIGHT is derived from them and
@@ -302,9 +349,72 @@ export default StyleSheet.create({
 
   // The error line for the shared `useAudioPlayback` hook.
   audioError: {
-    color: colors.danger,
-    fontSize: 14,
+    ...ERROR_TEXT,
     textAlign: "center",
     marginTop: 8,
+  },
+
+  // --- Text roles shared across screens ---
+
+  // A field's validation message, under the field.
+  errorText: {
+    ...ERROR_TEXT,
+    marginTop: 5,
+  },
+
+  // Settings' card headings and Wisdom's results line. Weight is left to the caller:
+  // Settings sets it bold, Wisdom keeps it regular so its bold search term stands out.
+  heading: {
+    fontSize: 24,
+    color: colors.brandStrong,
+  },
+
+  // Supporting copy - status lines, intros, "thinking..." - at body-adjacent size.
+  secondaryText: {
+    fontSize: 16,
+    color: colors.textSecondary,
+  },
+
+  // Inline link. Size comes from the surrounding text or the caller.
+  link: {
+    color: colors.brandStrong,
+    textDecorationLine: "underline",
+  },
+
+  // --- Bottom sheet (Meditation History, Privacy Policy) ---
+  // Rendered by <Sheet> in components/Layout.tsx; the sheet's height is its only prop.
+
+  sheetOverlay: {
+    flex: 1,
+    backgroundColor: colors.scrimOverlay,
+    justifyContent: "flex-end",
+  },
+  sheet: {
+    backgroundColor: colors.card,
+    borderTopLeftRadius: radius.sheet,
+    borderTopRightRadius: radius.sheet,
+    paddingBottom: 10,
+  },
+  sheetHeader: {
+    paddingRight: 20,
+    paddingTop: 8,
+    paddingBottom: 8,
+  },
+  sheetTitle: {
+    flex: 1,
+    marginLeft: 16,
+    textAlign: "left",
+  },
+  sheetActions: {
+    flexDirection: "row",
+    alignItems: "center",
+    paddingTop: 10,
+  },
+  sheetAction: {
+    padding: 4,
+  },
+  // The sheet's content gutter matches the title's 16pt inset.
+  sheetGutter: {
+    paddingHorizontal: 16,
   },
 });

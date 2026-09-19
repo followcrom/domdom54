@@ -2,17 +2,15 @@ import React, { useState, useEffect } from "react";
 import {
   View,
   Text,
-  Modal,
-  ScrollView,
   TouchableOpacity,
   StyleSheet,
   Share,
+  Alert,
 } from "react-native";
 import { Ionicons } from "@expo/vector-icons";
-import { useSafeAreaInsets } from "react-native-safe-area-context";
-import styles from "./styles/Styles";
+import styles, { bandColor } from "./styles/Styles";
 import colors from "./styles/colors";
-import { Body } from "./components/Layout";
+import { Body, Sheet } from "./components/Layout";
 import {
   MeditationLogEntry,
   entryMinutes,
@@ -26,17 +24,7 @@ type Props = {
   onClose: () => void;
 };
 
-// Row banding matches the rest of the app's lists (alt/card, 1.30:1).
-const ROW_COLORS = [colors.alt, colors.card];
-
-// The resting gap under the last row, before the device's own inset is added to it.
-const CONTENT_BOTTOM_PAD = 10;
-
 export default function MeditationHistory({ visible, onClose }: Props) {
-  // The sheet is anchored to the bottom of the screen, so its own bottom edge sits
-  // under the system navigation/gesture bar. Without this the last entry scrolls to
-  // its end behind that bar, taking its delete button with it.
-  const insets = useSafeAreaInsets();
   const [meditationLog, setMeditationLog] = useState<MeditationLogEntry[]>([]);
 
   const refresh = async () => {
@@ -77,115 +65,112 @@ export default function MeditationHistory({ visible, onClose }: Props) {
     setMeditationLog(updated.slice(-20).reverse());
   };
 
-  return (
-    <Modal
-      visible={visible}
-      animationType="slide"
-      transparent={true}
-      onRequestClose={onClose}
+  // Clears the WHOLE log, not just the 20 entries on screen - older entries have no
+  // other way to be removed short of uninstalling, and the privacy policy tells the
+  // user they can clear their history here. Confirmed first because it can't be undone.
+  const clearAll = () => {
+    Alert.alert(
+      "Clear all history?",
+      "This permanently deletes every meditation in your history. It can't be undone.",
+      [
+        { text: "Cancel", style: "cancel" },
+        {
+          text: "Clear all",
+          style: "destructive",
+          onPress: async () => {
+            await saveLog([]);
+            setMeditationLog([]);
+          },
+        },
+      ]
+    );
+  };
+
+  const shareAction = (
+    <TouchableOpacity
+      onPress={exportLog}
+      style={styles.sheetAction}
+      accessibilityRole="button"
+      accessibilityLabel="Export meditation history"
     >
-      <View style={localStyles.overlay}>
-        <View style={localStyles.sheet}>
-          <View style={[styles.row, localStyles.header]}>
-            <Text style={[styles.title, localStyles.modalTitle]}>Meditation History</Text>
-            <View style={localStyles.headerButtons}>
-              <TouchableOpacity onPress={exportLog} style={localStyles.closeButton}>
-                <Ionicons name="share-outline" size={24} color={colors.brand} />
-              </TouchableOpacity>
-              <TouchableOpacity onPress={onClose} style={localStyles.closeButton}>
-                <Ionicons name="close-circle-outline" size={24} color={colors.brand} />
+      <Ionicons name="share-outline" size={24} color={colors.brand} />
+    </TouchableOpacity>
+  );
+
+  return (
+    <Sheet
+      visible={visible}
+      onClose={onClose}
+      title="Meditation History"
+      height="80%"
+      actions={shareAction}
+    >
+      {meditationLog.length === 0 ? (
+        <View style={styles.sheetGutter}>
+          <Body>No history yet.</Body>
+        </View>
+      ) : (
+        meditationLog.map((entry, index) => {
+          const date = new Date(entry.timestamp);
+          const formatted = date.toLocaleString("en-GB", {
+            day: "2-digit",
+            month: "short",
+            year: "numeric",
+            hour: "2-digit",
+            minute: "2-digit",
+            hour12: false,
+          });
+          return (
+            <View
+              key={entry.timestamp}
+              style={[
+                styles.row,
+                styles.ruledRow,
+                localStyles.row,
+                { backgroundColor: bandColor(index) },
+              ]}
+            >
+              <Text style={localStyles.rowText}>
+                {formatted} - {entry.title}
+              </Text>
+              <TouchableOpacity
+                onPress={() => deleteEntry(entry.timestamp)}
+                style={localStyles.deleteButton}
+                hitSlop={{ top: 8, bottom: 8, left: 8, right: 8 }}
+                accessibilityRole="button"
+                accessibilityLabel={`Delete ${entry.title} on ${formatted}`}
+              >
+                <Ionicons name="trash-outline" size={20} color={colors.danger} />
               </TouchableOpacity>
             </View>
-          </View>
-          <ScrollView
-            contentContainerStyle={[
-              localStyles.scrollContent,
-              { paddingBottom: CONTENT_BOTTOM_PAD + insets.bottom },
-            ]}
-          >
-            {meditationLog.length === 0 ? (
-              <Body>No history yet.</Body>
-            ) : (
-              meditationLog.map((entry, index) => {
-                const date = new Date(entry.timestamp);
-                const formatted = date.toLocaleString("en-GB", {
-                  day: "2-digit",
-                  month: "short",
-                  year: "numeric",
-                  hour: "2-digit",
-                  minute: "2-digit",
-                  hour12: false,
-                });
-                return (
-                  <View
-                    key={entry.timestamp}
-                    style={[
-                      styles.row,
-                      localStyles.row,
-                      { backgroundColor: ROW_COLORS[index % 2] },
-                    ]}
-                  >
-                    <Text style={localStyles.rowText}>
-                      {formatted} - {entry.title}
-                    </Text>
-                    <TouchableOpacity
-                      onPress={() => deleteEntry(entry.timestamp)}
-                      style={localStyles.deleteButton}
-                      hitSlop={{ top: 8, bottom: 8, left: 8, right: 8 }}
-                    >
-                      <Ionicons name="trash-outline" size={20} color={colors.danger} />
-                    </TouchableOpacity>
-                  </View>
-                );
-              })
-            )}
-          </ScrollView>
-        </View>
-      </View>
-    </Modal>
+          );
+        })
+      )}
+
+      {meditationLog.length > 0 && (
+        <TouchableOpacity
+          onPress={clearAll}
+          style={localStyles.clearAll}
+          accessibilityRole="button"
+          accessibilityLabel="Clear all meditation history"
+        >
+          <Ionicons name="trash-outline" size={18} color={colors.danger} />
+          <Text style={localStyles.clearAllText}>Clear all history</Text>
+        </TouchableOpacity>
+      )}
+    </Sheet>
   );
 }
 
+// The overlay, sheet and header live in <Sheet>. What is left is the row itself.
 const localStyles = StyleSheet.create({
-  overlay: {
-    flex: 1,
-    backgroundColor: colors.scrimOverlay,
-    justifyContent: "flex-end",
-  },
-  sheet: {
-    backgroundColor: colors.card,
-    borderTopLeftRadius: 20,
-    borderTopRightRadius: 20,
-    minHeight: "80%",
-    maxHeight: "80%",
-    paddingBottom: 10,
-  },
-  header: {
-    paddingRight: 20,
-    paddingTop: 8,
-  },
-  modalTitle: {
-    flex: 1,
-    marginLeft: 16,
-    textAlign: "left",
-  },
-  headerButtons: {
-    flexDirection: "row",
-    alignItems: "center",
-    paddingTop: 10,
-  },
-  closeButton: {
-    padding: 4,
-  },
-  // paddingBottom is applied at the call site, where the safe-area inset is known.
-  scrollContent: {
-    paddingHorizontal: 12,
-  },
+  // Full-bleed and touching, banded like the Moments and Meditations lists. The rows
+  // used to be separate rounded pills 16pt apart; on the white sheet the white (`card`)
+  // pills merged with the gaps around them and read as rows twice the height of the
+  // grey ones. The 16pt side padding lines the text up with the sheet's title.
   row: {
-    paddingVertical: 10,
-    paddingHorizontal: 12,
-    borderRadius: 8,
-    marginVertical: 8,
+    paddingVertical: 14,
+    paddingHorizontal: 16,
   },
   rowText: {
     flex: 1,
@@ -194,5 +179,22 @@ const localStyles = StyleSheet.create({
   },
   deleteButton: {
     marginLeft: 12,
+  },
+  // A quiet text control under the list rather than a filled button: it is destructive
+  // and rarely wanted, so it should be findable but not inviting. 44pt tall to tap.
+  clearAll: {
+    flexDirection: "row",
+    alignItems: "center",
+    justifyContent: "center",
+    alignSelf: "center",
+    minHeight: 44,
+    marginTop: 12,
+    paddingHorizontal: 16,
+  },
+  clearAllText: {
+    color: colors.danger,
+    fontSize: 16,
+    fontWeight: "500",
+    marginLeft: 6,
   },
 });

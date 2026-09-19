@@ -6,7 +6,7 @@ import {
   FlatList,
   StyleSheet,
 } from "react-native";
-import styles, { LIST_ITEM_HEIGHT, TOP_BAR_HEIGHT } from "./styles/Styles";
+import styles, { LIST_ITEM_HEIGHT, TOP_BAR_HEIGHT, bandColor } from "./styles/Styles";
 import colors from "./styles/colors";
 import { useNavigation } from "@react-navigation/native";
 import { StackNavigationProp } from "@react-navigation/stack";
@@ -44,14 +44,7 @@ type MeditationItemProps = {
 
 const TabBar: React.FC<TabBarProps> = React.memo(({ tabs, activeTab, setActiveTab }) => {
   return (
-    <View
-      style={{
-        flexDirection: "row",
-        justifyContent: "space-around",
-        alignItems: "center",
-        minHeight: TOP_BAR_HEIGHT,
-      }}
-    >
+    <View style={medPageStyles.tabBar}>
       {tabs.map((tab, index) => (
         <TouchableOpacity
           key={index}
@@ -59,13 +52,10 @@ const TabBar: React.FC<TabBarProps> = React.memo(({ tabs, activeTab, setActiveTa
           accessibilityLabel={`Switch to ${tab} tab`}
         >
           <Text
-            style={{
-              color: activeTab === index ? colors.accentStrong : colors.brand,
-              borderBottomWidth: activeTab === index ? 2 : 0,
-              borderBottomColor:
-                activeTab === index ? colors.accent : "transparent",
-              fontSize: 18,
-            }}
+            style={[
+              medPageStyles.tabLabel,
+              activeTab === index && medPageStyles.tabLabelActive,
+            ]}
           >
             {tab}
           </Text>
@@ -83,7 +73,7 @@ const MeditationItem: React.FC<MeditationItemProps> = React.memo(({ item, index,
 
   const itemStyle = useMemo(() => [
     styles.listItem,
-    { backgroundColor: index % 2 === 0 ? colors.alt : colors.card },
+    { backgroundColor: bandColor(index) },
   ], [index]);
 
   return (
@@ -145,10 +135,6 @@ export default function Meditations() {
   ), [handlePress]);
 
   // Memoized content container style
-  const contentContainerStyle = useMemo(() => [
-    styles.listContainer, 
-    { paddingBottom: 20 } // Add padding to the bottom for better scroll experience
-  ], []);
 
   return (
     <View style={medPageStyles.container}>
@@ -157,7 +143,7 @@ export default function Meditations() {
       </View>
 
       <FlatList
-        contentContainerStyle={contentContainerStyle}
+        contentContainerStyle={styles.listContainer}
         data={audioFiles}
         keyExtractor={keyExtractor}
         renderItem={renderItem}
@@ -184,5 +170,21 @@ const medPageStyles = StyleSheet.create({
   },
   tabBarWrapper: {
     backgroundColor: colors.brandSurface,
+  },
+  tabBar: {
+    flexDirection: "row",
+    justifyContent: "space-around",
+    alignItems: "center",
+    minHeight: TOP_BAR_HEIGHT,
+  },
+  tabLabel: {
+    color: colors.brand,
+    fontSize: 18,
+  },
+  // Orange label and underline: the palette's "right now".
+  tabLabelActive: {
+    color: colors.accentStrong,
+    borderBottomWidth: 2,
+    borderBottomColor: colors.accent,
   },
 });

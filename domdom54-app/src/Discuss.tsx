@@ -304,7 +304,7 @@ export default function Discuss() {
   return (
     <KeyboardAvoidingView
       behavior="height"
-      style={{ flex: 1 }}
+      style={discussPageStyles.flex}
       keyboardVerticalOffset={90}
     >
       <ScrollView 
@@ -331,7 +331,7 @@ export default function Discuss() {
           {loading && (
             <View style={discussPageStyles.loadingContainer}>
               <ActivityIndicator size="small" color={colors.brand} />
-              <Text style={discussPageStyles.loadingText}>
+              <Text style={[styles.secondaryText, discussPageStyles.loadingText]}>
                 followCrom is thinking...
               </Text>
             </View>
@@ -372,7 +372,7 @@ export default function Discuss() {
           <Pressable
             style={[
               discussPageStyles.send,
-              !canSend && discussPageStyles.sendDisabled,
+              !canSend && styles.buttonContainerDisabled,
             ]}
             android_ripple={{ color: colors.divider, radius: 22, borderless: false }}
             onPress={handleFollowUp}
@@ -400,6 +400,9 @@ export default function Discuss() {
 
 // Enhanced styles for Discuss component
 const discussPageStyles = StyleSheet.create({
+  flex: {
+    flex: 1,
+  },
   // The composer: one white row holding the field and its send button, so "nothing
   // to send" is legible without a word of explanation. Composed on top of
   // styles.surface and styles.contentWidth, so only what differs lives here -
@@ -416,8 +419,7 @@ const discussPageStyles = StyleSheet.create({
     flexDirection: "row",
     alignItems: "center",
     marginTop: 14,
-    // The page's last element: without this it sits flush against the tab bar.
-    marginBottom: 16,
+    // No marginBottom: the gap above the tab bar is `styles.container`'s paddingBottom.
     paddingLeft: 16,
     paddingRight: 8,
     paddingVertical: 8,
@@ -449,12 +451,8 @@ const discussPageStyles = StyleSheet.create({
     overflow: "hidden",
   },
 
-  // Same treatment as a disabled PrimaryButton: a white fill with a visible outline,
-  // not a dimmed blue, which reads as broken rather than unavailable.
-  sendDisabled: {
-    backgroundColor: colors.card,
-    borderColor: colors.border,
-  },
+  // Disabled uses `styles.buttonContainerDisabled` directly - the same white fill and
+  // outline as a disabled PrimaryButton.
   loadingContainer: {
     paddingTop: 14,
     paddingBottom: 4,
@@ -462,8 +460,6 @@ const discussPageStyles = StyleSheet.create({
   },
   loadingText: {
     marginTop: 10,
-    fontSize: 16,
-    color: colors.textSecondary,
     fontStyle: "italic",
   },
   bubble: {

@@ -14,7 +14,7 @@ import { Ionicons } from "@expo/vector-icons";
 import { StackNavigationProp } from "@react-navigation/stack";
 import type { RootStackParamList } from "../App";
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
-import styles from './styles/Styles';
+import styles, { radius } from './styles/Styles';
 import colors from './styles/colors';
 import { PrimaryButton } from './components/PrimaryButton';
 
@@ -54,6 +54,9 @@ export default function Contact({ navigation }: ContactProps) {
   const [errors, setErrors] = useState<FormErrors>({});
   const [isLoading, setIsLoading] = useState<boolean>(false);
   const [submissionSuccess, setSubmissionSuccess] = useState<boolean>(false);
+  // The address the message went from, kept after the form is cleared so the
+  // banner can show it - a mistyped email is only fixable while they are still here.
+  const [sentEmail, setSentEmail] = useState<string>('');
   const insets = useSafeAreaInsets();
   const scrollViewRef = useRef<ScrollView | null>(null);
 
@@ -127,6 +130,7 @@ export default function Contact({ navigation }: ContactProps) {
       await response.json();
 
       // Reset form and show success banner
+      setSentEmail(formData.email.trim());
       setFormData({ name: '', email: '', subject: '', message: '' });
       setSubmissionSuccess(true);
       Vibration.vibrate(1000);
@@ -148,7 +152,6 @@ export default function Contact({ navigation }: ContactProps) {
     <KeyboardAvoidingView
       behavior="height"
       style={contactStyles.container}
-      keyboardVerticalOffset={50}
     >
       <ScrollView
         ref={scrollViewRef}
@@ -170,14 +173,16 @@ export default function Contact({ navigation }: ContactProps) {
         </View>
         <View style={contactStyles.formContainer}>
           <Text style={[styles.title, contactStyles.title]}>Contact Us</Text>
-          <Text style={contactStyles.subtitle}>
+          <Text style={[styles.secondaryText, contactStyles.subtitle]}>
             We'd love to hear from you. Send us a message and we'll respond as soon as possible.
           </Text>
 
           {submissionSuccess && (
             <View style={contactStyles.successBanner}>
               <Text style={contactStyles.successBannerText}>
-                🎉 Message sent successfully!
+                🎉 Message sent! We'll reply to{' '}
+                <Text style={contactStyles.successEmail}>{sentEmail}</Text>
+                {' '}as soon as we can.
               </Text>
               <TouchableOpacity
                 style={contactStyles.successButton}
@@ -201,7 +206,7 @@ export default function Contact({ navigation }: ContactProps) {
               placeholder="Dolly Parton"
               placeholderTextColor={colors.textSecondary}
             />
-            {errors.name && <Text style={contactStyles.errorText}>{errors.name}</Text>}
+            {errors.name && <Text style={styles.errorText}>{errors.name}</Text>}
           </View>
 
           {/* Email Input */}
@@ -216,7 +221,7 @@ export default function Contact({ navigation }: ContactProps) {
               keyboardType="email-address"
               autoCapitalize="none"
             />
-            {errors.email && <Text style={contactStyles.errorText}>{errors.email}</Text>}
+            {errors.email && <Text style={styles.errorText}>{errors.email}</Text>}
           </View>
 
           {/* Subject Input */}
@@ -229,7 +234,7 @@ export default function Contact({ navigation }: ContactProps) {
               placeholder="Hello Dolly"
               placeholderTextColor={colors.textSecondary}
             />
-            {errors.subject && <Text style={contactStyles.errorText}>{errors.subject}</Text>}
+            {errors.subject && <Text style={styles.errorText}>{errors.subject}</Text>}
           </View>
 
           {/* Message Input */}
@@ -244,13 +249,13 @@ export default function Contact({ navigation }: ContactProps) {
               ]}
               value={formData.message}
               onChangeText={(value) => handleInputChange('message', value)}
-              placeholder="Enter your message here..."
+              placeholder="Tell us what's on your mind..."
               placeholderTextColor={colors.textSecondary}
               multiline
               numberOfLines={6}
               textAlignVertical="top"
             />
-            {errors.message && <Text style={contactStyles.errorText}>{errors.message}</Text>}
+            {errors.message && <Text style={styles.errorText}>{errors.message}</Text>}
           </View>
 
           {/* Submit Button */}
@@ -286,9 +291,10 @@ const contactStyles = StyleSheet.create({
     flex: 1,
     backgroundColor: colors.card,
   },
+  // No paddingBottom: the ScrollView sets it inline from the safe-area inset, which
+  // overrode the 40 that used to be here.
   scrollContent: {
     flexGrow: 1,
-    paddingBottom: 40,
   },
   formContainer: {
     flex: 1,
@@ -301,15 +307,12 @@ const contactStyles = StyleSheet.create({
     marginBottom: 0,
     padding: 5,
   },
-  // Ink rather than brand blue, and tight to the top of the form.
+  // Colour comes from `styles.title`; this only pulls it tight to the top of the form.
   title: {
-    color: colors.brandStrong,
     marginTop: 0,
     marginBottom: 5,
   },
   subtitle: {
-    fontSize: 16,
-    color: colors.textSecondary,
     marginBottom: 20,
     textAlign: 'center',
     lineHeight: 22,
@@ -329,17 +332,12 @@ const contactStyles = StyleSheet.create({
   textArea: {
     minHeight: 100,
   },
-  errorText: {
-    color: colors.danger,
-    fontSize: 14,
-    marginTop: 5,
-  },
   successBanner: {
     backgroundColor: colors.successSurface,
     borderColor: colors.success,
     borderWidth: 1,
     padding: 20,
-    borderRadius: 8,
+    borderRadius: radius.md,
     marginBottom: 20,
     alignItems: 'center',
   },
@@ -347,18 +345,23 @@ const contactStyles = StyleSheet.create({
     color: colors.success,
     fontSize: 16,
     fontWeight: '500',
+    lineHeight: 22,
     marginBottom: 12,
     textAlign: 'center',
+  },
+  successEmail: {
+    fontWeight: '700',
   },
   successButton: {
     backgroundColor: colors.success,
     paddingVertical: 10,
     paddingHorizontal: 20,
-    borderRadius: 6,
+    borderRadius: radius.sm,
   },
   successButtonText: {
     color: colors.textInverse,
     fontSize: 16,
     fontWeight: '600',
+    lineHeight: 22,
   },
 });

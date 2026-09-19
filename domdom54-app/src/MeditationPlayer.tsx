@@ -217,14 +217,7 @@ export default function MeditationPlayer() {
           {/* Progress Bar */}
           <View style={playerStyles.outerProgressBarContainer}>
             <View style={playerStyles.progressBarContainer}>
-              <View
-                style={{
-                  height: 20,
-                  borderRadius: 10,
-                  width: `${progress}%`,
-                  backgroundColor: colors.brand,
-                }}
-              />
+              <View style={[playerStyles.progressFill, { width: `${progress}%` }]} />
             </View>
           </View>
 
@@ -260,17 +253,15 @@ const playerStyles = StyleSheet.create({
     padding: 10,
     marginTop: 5, // A liitle extra than safe area insets
   },
-    transportContainer: {
+  transportContainer: {
     width: "90%",
     backgroundColor: colors.scrimPanel,
     borderRadius: 10,
     margin: 20,
   },
-    transportContainerLandscape: {
+  // Composed after transportContainer; only the column narrows.
+  transportContainerLandscape: {
     width: "80%",
-    backgroundColor: colors.scrimPanel,
-    borderRadius: 10,
-    margin: 20,
   },
   title: {
     textAlign: "center",
@@ -309,5 +300,11 @@ const playerStyles = StyleSheet.create({
     borderWidth: 2,
     borderRadius: 20,
     overflow: "hidden",
+  },
+  // Width is set inline from playback progress.
+  progressFill: {
+    height: 20,
+    borderRadius: 10,
+    backgroundColor: colors.brand,
   },
 });

@@ -133,7 +133,7 @@ type RowProps = {
  */
 function Row({ label, value, onPress, busy, last, external }: RowProps) {
   const content = (
-    <View style={[styles.row, settingsStyles.row, last && settingsStyles.rowLast]}>
+    <View style={[styles.row, styles.ruledRow, settingsStyles.row, last && styles.ruledRowLast]}>
       <Text style={settingsStyles.rowLabel}>{label}</Text>
       {busy ? (
         <ActivityIndicator size="small" color={colors.brand} />
@@ -373,7 +373,7 @@ export default function Settings() {
           is one destination, not a group of related settings. */}
 
       <Card style={settingsStyles.card}>
-        <Text style={[settingsStyles.heading, settingsStyles.cardHeading]}>
+        <Text style={[styles.heading, settingsStyles.heading, settingsStyles.cardHeading]}>
           Account
         </Text>
 
@@ -382,7 +382,7 @@ export default function Settings() {
         <Row label="Last month" value={formatMinutes(totals.lastMonth)} />
         <Row label="All time" value={formatMinutes(totals.allTime)} last />
 
-        <Text style={settingsStyles.statusLine}>
+        <Text style={[styles.secondaryText, settingsStyles.statusLine]}>
           Your meditation history is only ever stored on this device. It is never shared with anyone.
         </Text>
       </Card>
@@ -398,7 +398,7 @@ export default function Settings() {
 
       <Card style={settingsStyles.card}>
         <View style={[styles.row, settingsStyles.switchRow]}>
-          <Text style={settingsStyles.heading}>Notifications</Text>
+          <Text style={[styles.heading, settingsStyles.heading]}>Notifications</Text>
           {busy ? (
             <View style={settingsStyles.switchControl}>
               <ActivityIndicator size="small" color={colors.brand} />
@@ -421,12 +421,12 @@ export default function Settings() {
         </View>
 
         {statusLine && (
-          <Text style={settingsStyles.statusLine}>{statusLine}</Text>
+          <Text style={[styles.secondaryText, settingsStyles.statusLine]}>{statusLine}</Text>
         )}
 
         {switchOn && (
           <Text
-            style={settingsStyles.link}
+            style={[styles.link, settingsStyles.link]}
             onPress={() =>
               navigation.navigate("HomeTabs", { screen: "Messages" })
             }
@@ -438,7 +438,7 @@ export default function Settings() {
 
         {isPermissionBlocked && (
           <Text
-            style={[settingsStyles.link, settingsStyles.linkAfterText]}
+            style={[styles.link, settingsStyles.link, settingsStyles.linkAfterText]}
             onPress={() => Linking.openSettings()}
             accessibilityRole="link"
           >
@@ -448,7 +448,7 @@ export default function Settings() {
       </Card>
 
       <Card style={settingsStyles.card}>
-        <Text style={[settingsStyles.heading, settingsStyles.cardHeading]}>
+        <Text style={[styles.heading, settingsStyles.heading, settingsStyles.cardHeading]}>
           Contact
         </Text>
 
@@ -462,7 +462,7 @@ export default function Settings() {
       </Card>
 
       <Card style={settingsStyles.card}>
-        <Text style={[settingsStyles.heading, settingsStyles.cardHeading]}>
+        <Text style={[styles.heading, settingsStyles.heading, settingsStyles.cardHeading]}>
           About
         </Text>
 
@@ -479,11 +479,17 @@ export default function Settings() {
         />
       </Card>
 
-      <PrivacyPolicy visible={showPrivacy} onClose={() => setShowPrivacy(false)} />
-
-      {/* The cards' spacing is all top margin, so the stack ends where it ends;
-          this is the gap above the tab bar. */}
-      <View style={{ height: 16 }} />
+      <PrivacyPolicy
+        visible={showPrivacy}
+        onClose={() => setShowPrivacy(false)}
+        onOpenContact={() => {
+          // Close the sheet first: it is a native Modal, so anything navigated to
+          // while it is open would sit underneath it.
+          setShowPrivacy(false);
+          navigation.navigate("Contact");
+        }}
+      />
+      {/* The gap above the tab bar is `styles.container`'s paddingBottom. */}
     </ScrollView>
   );
 }
@@ -496,10 +502,9 @@ const settingsStyles = StyleSheet.create({
     paddingHorizontal: 16,
     paddingVertical: 12,
   },
+  // Size and colour from `styles.heading`.
   heading: {
-    fontSize: 24,
     fontWeight: "bold",
-    color: colors.brandStrong,
     flexShrink: 1,
   },
   cardHeading: {
@@ -519,15 +524,12 @@ const settingsStyles = StyleSheet.create({
   // Subscribed shows a link where every other state shows a sentence, so these
   // two must occupy identical vertical space - matching size and top margin -
   // or the card grows and shrinks as the switch is toggled.
+  // Both composed onto shared styles: `secondaryText` and `link`.
   statusLine: {
-    fontSize: 16,
-    color: colors.textSecondary,
     marginTop: 4,
   },
   link: {
     fontSize: 16,
-    color: colors.brandStrong,
-    textDecorationLine: "underline",
     marginTop: 4,
   },
   // The blocked state is the one case where a link sits BELOW a sentence rather
@@ -537,14 +539,10 @@ const settingsStyles = StyleSheet.create({
   },
 
   // --- About rows ---
+  // The rule and its last-row removal are `styles.ruledRow` / `ruledRowLast`.
   row: {
     minHeight: 52,
     paddingVertical: 12,
-    borderBottomWidth: 1,
-    borderBottomColor: colors.divider,
-  },
-  rowLast: {
-    borderBottomWidth: 0,
   },
   rowLabel: {
     fontSize: 18,
