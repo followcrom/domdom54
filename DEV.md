@@ -10,6 +10,14 @@
 
 <br>
 
+### Pull latest from origin
+
+This fetches the newest commits from the remote branch origin/main and merges them into whatever branch you currently have checked out.
+
+```bash
+git pull origin main
+```
+
 ## ✂️ Dev vs Prod Split
 
 The dev vs prod split is driven by `process.env.APP_VARIANT === "development"` in `app.config.js`.
@@ -104,6 +112,7 @@ package is gone from the client entirely.
 4. Revoking sends `{action: "remove"}`, which deletes the row from `tokens_active`.
 
 **Two sheets:**
+
 - `tokens_active` — capped at 20 rows, deduplicated. The send job pulls from this one.
 - `tokens_all` — uncapped, append-only. One row per save/remove attempt (including
   rejections like `busy`/`capacity`/`server-error`), with a status column — a
