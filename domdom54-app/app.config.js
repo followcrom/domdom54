@@ -13,7 +13,7 @@ export default {
     slug: "domdom52",
     platforms: ["android"],
     version: "2.4.4",
-    runtimeVersion: "2.4.1",
+    runtimeVersion: "2.4.4",
     orientation: "default",
     icon: IS_DEV ? "./assets/dev_icon.png" : "./assets/icon.png",
     newArchEnabled: true,
