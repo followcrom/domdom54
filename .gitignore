@@ -44,3 +44,9 @@ builds/
 
 # FCM Credentials
 domdom54-app/google-services.json
+
+# Lambda
+lambdas/
+
+# Images
+imgs/

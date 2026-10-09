@@ -156,7 +156,7 @@ export default function PrivacyPolicy({ visible, onClose, onOpenContact }: Props
         <P style={policyStyles.warnText}>
           <Strong>Don't type anything sensitive into Discuss.</Strong> Your
           messages go to <Strong>DeepSeek</Strong>'s servers{" "}
-          <Strong>in China</Strong> – a country without a UK adequacy decision.
+          <Strong>in China</Strong>; a country without a UK adequacy decision.
           DeepSeek may retain your messages and use them to train its models.
           You can review{" "}
           <Link url={DEEPSEEK_POLICY_URL}>DeepSeek's privacy policy</Link>.

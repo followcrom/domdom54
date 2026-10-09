@@ -42,6 +42,12 @@ export const BUTTON_ICON_SIZE = 28;
 export const SCREEN_BOTTOM_GAP = 16;
 
 /**
+ * Height of the tab header's content, not counting the status bar above it. The
+ * header's full height is this plus the top safe-area inset.
+ */
+export const HEADER_CONTENT_HEIGHT = 66;
+
+/**
  * Corner radii. Only the steps that recur; one-off radii that are derived from a
  * control's own size (the composer's 26, the send button's 22) stay where they are.
  */

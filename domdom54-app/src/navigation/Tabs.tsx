@@ -5,6 +5,7 @@ import { MaterialCommunityIcons } from '@expo/vector-icons';
 import colors from "../styles/colors";
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { BottomTabBarProps } from '@react-navigation/bottom-tabs';
+import { HEADER_CONTENT_HEIGHT } from '../styles/Styles';
 
 // Screen Components
 import Home from '../Home';
@@ -167,7 +168,6 @@ function CustomTabBar({ state, descriptors, navigation }: BottomTabBarProps) {
 // Main Tab Navigator with custom tab bar
 export default function BottomTabs() {
   const insets = useSafeAreaInsets();
-  const HEADER_CONTENT_HEIGHT = 66;
 
   const headerStyle = {
     backgroundColor: colors.card,

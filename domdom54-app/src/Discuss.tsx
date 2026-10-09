@@ -1,4 +1,4 @@
-import React, { useState, useCallback, useRef, useMemo, useEffect } from "react";
+import React, { useState, useCallback, useRef, useEffect } from "react";
 import {
   StyleSheet,
   Text,
@@ -9,11 +9,13 @@ import {
   Pressable,
   Keyboard,
   KeyboardAvoidingView,
+  LayoutChangeEvent,
 } from "react-native";
 import styles from "./styles/Styles";
 import colors from "./styles/colors";
 import { Banner, Card } from "./components/Layout";
 import { Ionicons } from "@expo/vector-icons";
+import { useSafeAreaInsets } from "react-native-safe-area-context";
 import {
   useRoute,
   useFocusEffect,
@@ -23,7 +25,7 @@ import type { TabParamList } from "./navigation/Tabs";
 
 // --- Type Definitions ---
 type ConversationMessage = {
-  role: "user" | "assistant" | "system";
+  role: "user" | "assistant";
   content: string;
   timestamp?: number;
 };
@@ -75,6 +77,19 @@ export default function Discuss() {
   const scrollViewRef = useRef<ScrollView>(null);
   const textInputRef = useRef<TextInput>(null);
   const abortControllerRef = useRef<AbortController | null>(null);
+  // Where this screen's top actually sits on screen, measured rather than derived
+  // from the header's style - see the KeyboardAvoidingView below.
+  const rootRef = useRef<View>(null);
+  const [screenTop, setScreenTop] = useState(0);
+  const measureScreenTop = useCallback(() => {
+    rootRef.current?.measureInWindow((_x, y) => setScreenTop(y));
+  }, []);
+  // measureInWindow on Android counts from BELOW the status bar, but the keyboard's
+  // screenY counts from the top of the screen. Measured on device: screenTop 66.1
+  // (the header alone) against a keyboard top of 494.9 from the screen's top edge.
+  // Adding the status bar puts both in the same frame.
+  const insets = useSafeAreaInsets();
+  const keyboardOffset = screenTop + insets.top;
 
   // State management
   const [loading, setLoading] = useState(false);
@@ -82,12 +97,11 @@ export default function Discuss() {
   const [conversationHistory, setConversationHistory] = useState<ConversationMessage[]>([]);
   const [currentPhrase, setCurrentPhrase] = useState<string>("");
 
-  // System message - memoized to prevent recreation
-  const systemMessage = useMemo<ConversationMessage>(() => ({
-    role: "system",
-    content: "You are followCrom the Wise, a sage of wisdom. Offer concise, insightful guidance. Speak calmly, use humour when needed, and ensure clarity. Begin replies with 'followCrom says:', imparting profound truths succinctly.",
-    timestamp: Date.now(),
-  }), []);
+  // There is no system prompt in the app. The Lambda behind DISCUSS_API_URL adds
+  // followCrom's persona server-side, so that is the place to change it. A copy used
+  // to live here, but it was stripped before every request (so editing it did
+  // nothing) and the history trim put it back into the conversation, where past 20
+  // messages it was rendered as a followCrom bubble.
 
   // --- Utility: Reset state ---
   const resetState = useCallback(() => {
@@ -116,7 +130,6 @@ export default function Discuss() {
       const initialPrompt = `Provide a concise, insightful expansion on the following quote without restating it: "${phrase}"`;
 
       const messages: ConversationMessage[] = [
-        systemMessage,
         { role: "user", content: initialPrompt, timestamp: Date.now() }
       ];
 
@@ -136,12 +149,12 @@ export default function Discuss() {
       // blank and silent.
       addToConversation(
         "assistant",
-        "followCrom says: I apologize, but I'm having trouble connecting to my wisdom right now. Please try again."
+        "followCrom says: I apologize, but I couldn't process that request. Please try again."
       );
     } finally {
       setLoading(false);
     }
-  }, [systemMessage, resetState]); // Removed circular dependencies
+  }, [resetState]);
 
   // --- Watch for discussPhrase changes ---
   useEffect(() => {
@@ -169,6 +182,28 @@ export default function Discuss() {
     }, [])
   );
 
+  // The composer is the last thing in the scroll content, so when the keyboard
+  // opens, scrolling to the end is what keeps the field and the latest reply in
+  // view. This runs on the ScrollView's onLayout, NOT on keyboardDidShow: that event
+  // arrives before the KeyboardAvoidingView's padding has shrunk the viewport, so a
+  // scroll made then lands at the end of the old, taller viewport and the shrink
+  // that follows clips the bottom of the composer behind the keyboard's top edge.
+  // onLayout fires once the viewport has its new height. The trigger is the viewport
+  // getting SHORTER, not Keyboard.isVisible(): the isVisible check never let the
+  // scroll happen on device (the composer was left 8pt past the viewport's bottom
+  // edge, i.e. not scrolled at all). A shrink is exactly the case that needs it -
+  // the keyboard taking room - and a grow (keyboard closing) is left alone.
+  const viewportHeightRef = useRef(0);
+  const scrollToEndOnShrink = useCallback((e: LayoutChangeEvent) => {
+    const h = e.nativeEvent.layout.height;
+    const shrank = viewportHeightRef.current > 0 && h < viewportHeightRef.current;
+    viewportHeightRef.current = h;
+    if (shrank) {
+      // Next frame, so the scroll runs against the content laid out at the new size.
+      requestAnimationFrame(() => scrollViewRef.current?.scrollToEnd({ animated: true }));
+    }
+  }, []);
+
   // --- Cleanup on unmount ---
   useEffect(() => {
     return () => {
@@ -189,12 +224,11 @@ export default function Discuss() {
       const updatedHistory = [...prevHistory, newMessage];
       // Keep conversation history manageable
       if (updatedHistory.length > MAX_CONVERSATION_LENGTH) {
-        // Keep system message and recent messages
-        return [systemMessage, ...updatedHistory.slice(-MAX_CONVERSATION_LENGTH + 1)];
+        return updatedHistory.slice(-MAX_CONVERSATION_LENGTH);
       }
       return updatedHistory;
     });
-  }, [systemMessage]);
+  }, []);
 
   // Calls the backend proxy, which holds the provider key and adds the system
   // prompt server-side. We only send the user/assistant turns.
@@ -213,7 +247,7 @@ export default function Discuss() {
         },
         body: JSON.stringify({
           messages: messages
-            .filter(({ role, content }) => role !== "system" && typeof content === "string")
+            .filter(({ content }) => typeof content === "string")
             .map(({ role, content }) => ({ role, content })),
         }),
         signal: abortControllerRef.current.signal,
@@ -263,7 +297,6 @@ export default function Discuss() {
 
       // Build messages array including conversation history
       const messages: ConversationMessage[] = [
-        systemMessage,
         ...conversationHistory,
         { role: "user", content: trimmedInput, timestamp: Date.now() }
       ];
@@ -287,7 +320,7 @@ export default function Discuss() {
     } finally {
       setLoading(false);
     }
-  }, [userInput, loading, systemMessage, conversationHistory, fetchOpenAIResponse, addToConversation]);
+  }, [userInput, loading, conversationHistory, fetchOpenAIResponse, addToConversation]);
 
   // Handle input submission
   const handleSubmitEditing = useCallback(() => {
@@ -302,13 +335,23 @@ export default function Discuss() {
   const canSend = !loading && userInput.trim().length > 0;
 
   return (
+    // With edge-to-edge on, Android no longer resizes the window for the keyboard,
+    // so this view has to make the room itself.
+    // "padding", not "height": height mode resizes the view and then measures that
+    // shrunk size on the next keyboard event, so the error compounds and the screen
+    // ends up squashed under the banner, often staying that way after the keyboard
+    // closes. Padding leaves the view's own size alone.
+    // The offset is how far this view's top sits below the top of the screen:
+    // measured with measureInWindow, plus the status bar (see keyboardOffset).
+    <View ref={rootRef} style={discussPageStyles.flex} onLayout={measureScreenTop}>
     <KeyboardAvoidingView
-      behavior="height"
+      behavior="padding"
       style={discussPageStyles.flex}
-      keyboardVerticalOffset={90}
+      keyboardVerticalOffset={keyboardOffset}
     >
       <ScrollView 
         ref={scrollViewRef}
+        onLayout={scrollToEndOnShrink}
         contentContainerStyle={styles.container}
         keyboardShouldPersistTaps="handled"
         showsVerticalScrollIndicator={false}
@@ -395,6 +438,7 @@ export default function Discuss() {
         </View>
       </ScrollView>
     </KeyboardAvoidingView>
+    </View>
   );
 }
 

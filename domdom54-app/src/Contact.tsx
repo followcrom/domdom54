@@ -149,9 +149,15 @@ export default function Contact({ navigation }: ContactProps) {
   };
 
   return (
+    // Same reasoning as Discuss: edge-to-edge means this view makes room for the
+    // keyboard itself, and "padding" rather than "height" so it can't get stuck
+    // shrunk. The offset is 0 because Contact is a full-screen modal with no header -
+    // its top is the top of the screen (the status bar is handled by the ScrollView's
+    // paddingTop, which is inside this view, not above it).
     <KeyboardAvoidingView
-      behavior="height"
+      behavior="padding"
       style={contactStyles.container}
+      keyboardVerticalOffset={0}
     >
       <ScrollView
         ref={scrollViewRef}

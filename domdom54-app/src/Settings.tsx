@@ -376,10 +376,10 @@ export default function Settings() {
 
       <Card style={settingsStyles.card}>
         <Text style={[styles.heading, settingsStyles.heading, settingsStyles.cardHeading]}>
-          Account
+          Meditation history
         </Text>
 
-        <Row label="Meditation history" onPress={() => setShowHistory(true)} />
+        <Row label="Recent sessions" onPress={() => setShowHistory(true)} />
         <Row label="This month" value={formatMinutes(totals.thisMonth)} />
         <Row label="Last month" value={formatMinutes(totals.lastMonth)} />
         <Row label="All time" value={formatMinutes(totals.allTime)} last />
