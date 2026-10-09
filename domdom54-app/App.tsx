@@ -1,10 +1,11 @@
 import "react-native-gesture-handler";
-import React, { useEffect, useRef } from "react";
+import React, { useEffect, useRef, useState } from "react";
 import {
   NavigationContainer,
   NavigationContainerRef,
   NavigatorScreenParams,
   DefaultTheme,
+  InitialState,
 } from "@react-navigation/native";
 import * as Notifications from 'expo-notifications';
 import { createStackNavigator } from "@react-navigation/stack";
@@ -98,10 +99,44 @@ const linking = {
 
 // --- Main App Component ---
 
+// Builds a partial navigation state that opens straight onto the Messages tab with the
+// notification's payload. Partial on purpose: the tab router fills in the other tabs, and
+// with backBehavior="initialRoute" in Tabs.tsx the back button still leads to Home.
+const messagesState = (data: NotificationData): InitialState => ({
+  routes: [
+    {
+      name: "HomeTabs",
+      state: { routes: [{ name: "Messages", params: data }] },
+    },
+  ],
+});
+
+const hasPayload = (data: unknown): data is NotificationData =>
+  !!data && typeof data === "object" && Object.keys(data).length > 0;
+
 export default function App() {
   const navigationRef = useRef<NavigationContainerRef<RootStackParamList>>(null);
   const notificationListener = useRef<EventSubscription | null>(null);
   const responseListener = useRef<EventSubscription | null>(null);
+  // A tap that arrives before the navigator is ready is parked here and replayed in onReady.
+  const pendingNotification = useRef<NotificationData | null>(null);
+
+  // Cold start from a notification tap. getLastNotificationResponse() is synchronous, so
+  // the response is known on the very first render and the navigator can START on
+  // Messages via initialState. The previous version rendered Home first and navigated
+  // after a 500 ms + 100 ms setTimeout chain, which is the pause the user saw.
+  //
+  // Read once (useState initialiser) so re-renders don't recompute it. The identifier is
+  // kept so the response listener below can ignore the same tap if it also delivers it.
+  const [coldStart] = useState(() => {
+    const response = Notifications.getLastNotificationResponse();
+    const data = response?.notification.request.content.data;
+    if (!response || !hasPayload(data)) return null;
+    return {
+      id: response.notification.request.identifier,
+      state: messagesState(data),
+    };
+  });
 
   useEffect(() => {
     // Create the Android notification channel once at startup. This is the
@@ -127,32 +162,23 @@ export default function App() {
         // Optional: You could show an in-app notification here
       });
 
-    // Handler for when a user taps on a notification
+    // Handler for when a user taps on a notification while the app is running
+    // (foreground or background). Cold starts are handled by initialState above.
     responseListener.current =
       Notifications.addNotificationResponseReceivedListener((response) => {
+        // Mark it handled, otherwise getLastNotificationResponse() would return this
+        // same tap on the next cold start from the launcher and reopen Messages.
+        Notifications.clearLastNotificationResponse();
+        if (response.notification.request.identifier === coldStart?.id) return;
         const data = response.notification.request.content.data as NotificationData;
         console.log("Notification response received:", data);
         handleNotification(data);
       });
 
-    // Check if the app was opened from a notification that was received while the app was closed
-    const checkInitialNotification = async () => {
-      try {
-        const response = await Notifications.getLastNotificationResponseAsync();
-        if (response) {
-          const data = response.notification.request.content.data as NotificationData;
-          console.log("App opened from notification:", data);
-          // Wait a bit longer for navigation to be ready
-          setTimeout(() => {
-            handleNotification(data);
-          }, 500);
-        }
-      } catch (error) {
-        console.error("Error checking initial notification:", error);
-      }
-    };
-
-    checkInitialNotification();
+    if (coldStart) {
+      console.log("App opened from notification");
+      Notifications.clearLastNotificationResponse();
+    }
 
     // Cleanup listeners on unmount
     return () => {
@@ -165,24 +191,29 @@ export default function App() {
     };
   }, []);
 
+  const navigateToMessages = (data: NotificationData) => {
+    try {
+      // Messages is nested inside HomeTabs, so the params have to be
+      // addressed through the tab navigator rather than passed to a
+      // top-level route.
+      navigationRef.current?.navigate("HomeTabs", {
+        screen: "Messages",
+        params: data,
+      });
+    } catch (error) {
+      console.error("Navigation error:", error);
+    }
+  };
+
   const handleNotification = (data: NotificationData) => {
-    if (data && navigationRef.current?.isReady()) {
-      // Ensure we have the navigation ready and data is valid
-      setTimeout(() => {
-        try {
-          // Messages is nested inside HomeTabs, so the params have to be
-          // addressed through the tab navigator rather than passed to a
-          // top-level route.
-          navigationRef.current?.navigate("HomeTabs", {
-            screen: "Messages",
-            params: data,
-          });
-        } catch (error) {
-          console.error("Navigation error:", error);
-        }
-      }, 100);
+    if (!hasPayload(data)) {
+      console.warn("Invalid notification data:", data);
+      return;
+    }
+    if (navigationRef.current?.isReady()) {
+      navigateToMessages(data);
     } else {
-      console.warn("Navigation not ready or invalid notification data:", data);
+      pendingNotification.current = data;
     }
   };
 
@@ -208,12 +239,21 @@ export default function App() {
         ref={navigationRef}
         theme={navigationTheme}
         linking={linking}
+        // Only set when the app was cold-started by a notification tap. When it is
+        // undefined, linking resolves the initial route as before.
+        initialState={coldStart?.state}
         fallback={
           <View style={{ flex: 1, justifyContent: 'center', alignItems: 'center' }}>
             <ActivityIndicator size="large" color={colors.brand} />
           </View>
         }
-        onReady={() => console.log("Navigation container ready")}
+        onReady={() => {
+          console.log("Navigation container ready");
+          if (pendingNotification.current) {
+            navigateToMessages(pendingNotification.current);
+            pendingNotification.current = null;
+          }
+        }}
       >
         <Stack.Navigator
           initialRouteName="HomeTabs"
