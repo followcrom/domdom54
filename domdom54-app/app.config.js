@@ -45,7 +45,20 @@ export default {
       // emits the pre-merge app manifest, where the permission is absent either way. The
       // proof is the remove directive being present, and then the merged manifest in the
       // built artifact.
-      blockedPermissions: ["android.permission.RECORD_AUDIO"],
+      //
+      // The other three are Expo template defaults that nothing in the app uses, found in
+      // the merged manifest of the 2.4.4 AAB (Oct 2026):
+      //   SYSTEM_ALERT_WINDOW     "display over other apps" - no overlay UI here
+      //   READ/WRITE_EXTERNAL_STORAGE  no file access; both are no-ops from Android 10
+      //                                (API 29) anyway, and minSdk is 24
+      // Re-check the merged manifest of the next AAB: removing a permission a library
+      // actually needs fails at runtime, not at build time.
+      blockedPermissions: [
+        "android.permission.RECORD_AUDIO",
+        "android.permission.SYSTEM_ALERT_WINDOW",
+        "android.permission.READ_EXTERNAL_STORAGE",
+        "android.permission.WRITE_EXTERNAL_STORAGE",
+      ],
     },
     androidStatusBar: {
       // `barStyle` ONLY, and this block must not be deleted. Verified with
