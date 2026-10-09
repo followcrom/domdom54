@@ -32,7 +32,7 @@ $env:APP_VARIANT='production'; npx expo config
 APP_VARIANT=production npx expo config
 ```
 
-**NOTE**: APP_VARIANT='production' does not persist in the shell, so it won't affect your local dev work. Safest is to scope it and clean up:
+**NOTE**: In PowerShell, `$env:APP_VARIANT='production'` **does persist** for the rest of that terminal session, so it would leak into your local dev work. (The WSL form above is scoped to the one command and doesn't persist.) Safest in PowerShell is to scope it and clean up:
 
 ```powershell
 # Windows PowerShell syntax:
@@ -48,7 +48,7 @@ afterwards so you don't carry it into dev work.
 Confirm the output shows `com.followcrom.domdom`, `RanDOM WisDOM`, and scheme
 `domdom52`.
 
-**Bump `versionCode`** in `app.config.js` if the current value was already uploaded to Play Console.
+**Bump `versionCode`** in `app.config.js` if the current value was already uploaded to Play Console. An upload that Play *rejected* (e.g. wrong signing key) never registers its `versionCode`, so a rebuild can reuse it.
 
 Bump `version` (and usually `runtimeVersion`) for a user-facing store release. For an OTA-only release, bump `version` but leave `runtimeVersion` alone - see [Versioning](#versioning) under OTA Updates.
 
@@ -56,7 +56,7 @@ Bump `version` (and usually `runtimeVersion`) for a user-facing store release. F
 
 ## 🏗️ 2. Development build (Native changes need a new dev build)
 
-Two options for dev builds: `development` (debuggable, fetches JS from Metro) and `preview` (release-like, embeds JS in the APK). Both install as `RanDEV WisDEV` (`com.followcrom.domdom.dev`) alongside the production app.
+Two options for dev builds: `development` (debuggable, fetches JS from Metro) and `preview` (release-like, embeds JS in the APK). Both install as `RanDEV WisDEV` (`com.followcrom.domdom.dev`) alongside the production app. They share that package with each other, though, so installing one **replaces** the other. Each reinstall also gets a fresh push token: open the app once so it re-registers before sending test notifications.
 
 ```powershell
 eas build --profile development --platform android
@@ -86,6 +86,15 @@ eas build --profile preview --platform android
 eas build --profile production --platform android
 ```
 
+⚠️ **Don't remove `env: { "APP_VARIANT": "production" }` from the `production` build profile in `eas.json`.**
+EAS CLI picks the signing keystore *on your machine* by evaluating `app.config.js`, which
+loads `.env` (`APP_VARIANT=development`). Without the profile's `env` block, the CLI
+resolves `com.followcrom.domdom.dev` and signs with the **dev** keystore, while the build
+server (which never sees the gitignored `.env`) still writes the production package name
+into the AAB. The build succeeds, and Play rejects the upload with *"The Android App Bundle
+was signed with the wrong key"*. This happened on 2.4.4 (Oct 2026). Before submitting,
+check the build's page on expo.dev shows the keystore for `com.followcrom.domdom`.
+
 <br>
 
 ## 📤 4. EAS Submit
@@ -93,12 +102,19 @@ eas build --profile production --platform android
 The first submission of the app needs to be performed manually. Subsequent submissions can be automated using EAS Submit.
 
 🛤️ Test the AAB on Play Console's INTERNAL TESTING track first:
-set `submit.production.android.track to "internal"` in eas.json
+set `submit.production.android.track` to `"internal"` in `eas.json`
 
-Submit the AAB (`playstore_key.json` is saved in eas credentials):
+Submit the AAB (`playstore_key.json` is saved in eas credentials).
+
+`eas submit` also reads `app.config.js` locally to find the package name, and submit
+profiles can't carry an `env` block, so scope `APP_VARIANT` yourself. Otherwise it offers
+the Google Service Account Key for `com.followcrom.domdom.dev`. If the prompt mentions
+`.dev`, cancel.
 
 ```powershell
+$env:APP_VARIANT='production'
 eas submit --profile production --platform android
+Remove-Item Env:\APP_VARIANT
 ```
 
 <br>
@@ -119,7 +135,7 @@ before it's public.
 Once the internal-track build has been verified, promote that **same AAB** to
 Production.
 
-1. Play Console -> your app -> **Testing -> Internal testing**.
+1. Play Console -> your app -> **Test and release -> Testing -> Internal testing**.
 2. Find the release you just verified -> **Promote release** -> choose
    **Production** as the target track.
 3. This will create a Production release. Review/edit the release notes for the production listing (Play Console pre-fills them from
@@ -136,7 +152,7 @@ On GCP, I have a project called **Google Play Console Developer**. This is for u
 
 Go to GCP -> IAM. Note the long email has **Service Account Token Creator** and **Service Account User** roles. These are added via the **Service Account** (LHM IAM -> Service Accounts). Click on the link (email address) to open the service account details. Roles can be added under the "Permissions" tab. Click "Manage access" and search for "Service Account Token Creator" and "Service Account User". Assign these roles to the service account. (💡 I don't know if I need both, but I was getting a _Invalid JWT Signature error_, and adding the Service Account Token Creator role seemed to solve that.)
 
-My old `playstore_key.json` was returning errors, so I needed to create a new key. Go to LHM IAM -> Service Accounts, click "Keys" on the top menu, "Add Key", "Create new key" and select key tpe "JSON". This will download a JSON file which I saved as `playstore_key.json` and is referenced in the `eas.json` file.
+My old `playstore_key.json` was returning errors, so I needed to create a new key. Go to LHM IAM -> Service Accounts, click "Keys" on the top menu, "Add Key", "Create new key" and select key tpe "JSON". This will download a JSON file which I saved as `playstore_key.json` and uploaded to EAS credentials (`eas credentials --platform android` -> Google Service Account). It is **not** referenced in `eas.json`.
 
 Back on the **Google Play Console**, look for "Users and Permissions" on the LHM. You will see one of the users is the service account email address. Click on it to see the permissions. You need to add the "Releases" role to this user. I gave it admin access, which is all permissions.
 
@@ -144,12 +160,14 @@ Back on the **Google Play Console**, look for "Users and Permissions" on the LHM
 
 A keystore is different from a playstore_key.json file. The keystore (typically a file with a .jks or .keystore extension) is used to sign your Android app, which is a requirement for publishing on the Google Play Store.
 
-When you use EAS, it manages this entire .keystore file and its private key for you. This is why you don't need to manually interact with the file. EAS generates the key, stores it securely, and uses it to sign your builds before submitting them to Google Play.
+When you use EAS, it manages this entire .keystore file and its private key for you. This is why you don't need to manually interact with the file. EAS generates the key, stores it securely, and uses it to sign your builds.
+
+Strictly, this is the **upload key**. With Play App Signing, Google checks the AAB was signed with your registered upload key, then re-signs the app with its own app signing key before delivering it to users. A mismatch on the upload key is what produces *"signed with the wrong key ... expected: SHA1: ..."*. The dev app (`com.followcrom.domdom.dev`) has its own, separate keystore in EAS.
 
 Download your keystore from Expo’s servers:
 
 ```bash
-eas credentials -p android --platform android
+eas credentials --platform android
 ```
 
 <br>
@@ -170,13 +188,13 @@ eas env:pull
 
 ### eas credentials
 
-The three crentials files are:
+The three credentials files are:
 
-- `playstore_key.json` - used for EAS Submit to upload the AAB to Google Play Console
-- `google-services.json` - used for Firebase Cloud Messaging
-- `.jks` keystore file - used to sign the Android app before submission to Google
+- `playstore_key.json` - used for EAS Submit to upload the AAB to Google Play Console. Stored in EAS credentials (Google Service Account).
+- `.jks` keystore file - the upload key used to sign the Android app. Stored in EAS credentials, one per package (production and `.dev`).
+- `google-services.json` - Firebase config for Cloud Messaging. This is **not** in EAS credentials: it is an EAS environment variable of type *file* (`GOOGLE_SERVICES_JSON`, read by `app.config.js`), managed with the `eas env:*` commands above.
 
-These are stored in the Expo servers and are not checked into source control. You can download them using `eas credentials -p android --platform android`.
+None of these are checked into source control. Manage the first two with `eas credentials --platform android` (the keystore can be downloaded from there).
 
 <br>
 
@@ -209,7 +227,7 @@ so adopting it now costs nothing.
 You can publish an EAS Update to the preview channel and the preview build already on your device will fetch it — no reinstall required:
 
 ```bash
-eas update --branch preview --environment development --platform android --message "OTA update - Version: 2.4.2, Runtime: 2.4.1"
+eas update --branch preview --environment development --platform android --message "OTA update - Version: 2.4.4, Runtime: 2.4.1"
 ```
 
 `--environment development` matters here for the same reason as above: `eas.json` maps

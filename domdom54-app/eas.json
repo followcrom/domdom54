@@ -33,6 +33,9 @@
       "distribution": "store",
       "channel": "production",
       "environment": "production",
+      "env": {
+        "APP_VARIANT": "production"
+      },
       "android": {
         "buildType": "app-bundle"
       }
