@@ -26,7 +26,7 @@ export default {
     android: {
       package: IS_DEV ? "com.followcrom.domdom.dev" : "com.followcrom.domdom",
       googleServicesFile: process.env.GOOGLE_SERVICES_JSON,
-      versionCode: 8,
+      versionCode: 9,
       adaptiveIcon: {
         foregroundImage: IS_DEV
           ? "./assets/dev_icon.png"
