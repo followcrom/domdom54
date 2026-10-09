@@ -90,6 +90,12 @@ export default {
       // the expo-audio plugin can only edit permissions, not its own library manifest.
       ["expo-audio", { recordAudioAndroid: false }],
       "./plugins/withoutAudioRecordingService",
+      // Production only: drops expo-dev-launcher's portrait-locked barcode activity
+      // that Play flagged for large screens. See the plugin for details.
+      "./plugins/withoutDevLauncherBarcodeScanner",
+      // android.r8.optimizedResourceShrinking=true. Requires the minify + shrink flags
+      // in expo-build-properties below.
+      "./plugins/withR8OptimizedResourceShrinking",
       "expo-font",
       "expo-asset",
       [
